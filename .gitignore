@@ -1,0 +1,20 @@
+*.class
+
+# Package Files #
+*.war
+build
+out
+./tests
+test-results
+distribution
+.DS_Store
+generated-*
+cvs
+git
+source/*/target
+source/*/*/target
+source/*/*/*/target
+source/*/*/*/*/target
+idea
+target
+*/*/*/velocity.log
