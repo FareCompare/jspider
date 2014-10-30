@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>net.javacoding.jspider</groupId>
+		<artifactId>jspider</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>jspider-crawler</artifactId>
+    <packaging>jar</packaging>
+
+	<name>crawler</name>
+
+	<properties>
+		<version.template.file>src/main/templates/Constants.java.template</version.template.file>
+		<version.file>src/main/java/net/javacoding/jspider/Constants.java</version.file>
+	</properties>
+
+	<dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>velocity</groupId>
+			<artifactId>velocity-dep</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.google.code.maven-replacer-plugin</groupId>
+				<artifactId>maven-replacer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>generate</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>replace</goal>
+						</goals>
+						<configuration>
+							<file>${version.template.file}</file>
+							<outputFile>${version.file}</outputFile>
+							<replacements>
+								<replacement>
+									<token>@jspider.version.number@</token>
+									<value>${jspider.version.number}</value>
+								</replacement>
+								<replacement>
+									<token>@jspider.version.string@</token>
+									<value>${jspider.version.string}</value>
+								</replacement>
+								<replacement>
+									<token>@build.DSTAMP@</token>
+									<value>${maven.build.timestamp}</value>
+								</replacement>
+							</replacements>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+</project>

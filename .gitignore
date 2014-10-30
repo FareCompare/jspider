@@ -11,10 +11,7 @@ distribution
 generated-*
 cvs
 git
-source/*/target
-source/*/*/target
-source/*/*/*/target
-source/*/*/*/*/target
+source/**/target
 idea
-target
-*/*/*/velocity.log
+**/velocity.log
+output
