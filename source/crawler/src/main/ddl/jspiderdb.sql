@@ -21,6 +21,10 @@ CREATE DATABASE IF NOT EXISTS seo_spider;
 
 USE seo_spider;
 
+
+-- DROP TABLE IF EXISTS jspider_content;DROP TABLE IF EXISTS jspider_site;DROP TABLE IF EXISTS jspider_cookie;DROP TABLE IF EXISTS jspider_decision;DROP TABLE IF EXISTS jspider_decision_step;DROP TABLE IF EXISTS jspider_email_address;DROP TABLE IF EXISTS jspider_email_address_reference;DROP TABLE IF EXISTS jspider_folder;DROP TABLE IF EXISTS jspider_resource;DROP TABLE IF EXISTS jspider_resource_reference;
+
+
 CREATE TABLE IF NOT EXISTS jspider_content (
     id      INT(11) NOT NULL DEFAULT '0',
     content BLOB

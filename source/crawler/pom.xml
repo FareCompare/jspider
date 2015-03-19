@@ -27,6 +27,10 @@
 			<groupId>velocity</groupId>
 			<artifactId>velocity-dep</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
