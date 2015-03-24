@@ -22,14 +22,14 @@ CREATE DATABASE IF NOT EXISTS seo_spider;
 USE seo_spider;
 
 
--- DROP TABLE IF EXISTS jspider_content;DROP TABLE IF EXISTS jspider_site;DROP TABLE IF EXISTS jspider_cookie;DROP TABLE IF EXISTS jspider_decision;DROP TABLE IF EXISTS jspider_decision_step;DROP TABLE IF EXISTS jspider_email_address;DROP TABLE IF EXISTS jspider_email_address_reference;DROP TABLE IF EXISTS jspider_folder;DROP TABLE IF EXISTS jspider_resource;DROP TABLE IF EXISTS jspider_resource_reference;
+DROP TABLE IF EXISTS jspider_content;DROP TABLE IF EXISTS jspider_site;DROP TABLE IF EXISTS jspider_cookie;DROP TABLE IF EXISTS jspider_decision;DROP TABLE IF EXISTS jspider_decision_step;DROP TABLE IF EXISTS jspider_email_address;DROP TABLE IF EXISTS jspider_email_address_reference;DROP TABLE IF EXISTS jspider_folder;DROP TABLE IF EXISTS jspider_resource;DROP TABLE IF EXISTS jspider_resource_reference;
 
 
 CREATE TABLE IF NOT EXISTS jspider_content (
     id      INT(11) NOT NULL DEFAULT '0',
     content BLOB
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
 
 --
 -- Table structure for table 'jspider_cookie'
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS jspider_cookie (
     expires VARCHAR(255)          DEFAULT NULL,
     PRIMARY KEY (id)
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
 
 --
 -- Table structure for table 'jspider_decision'
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS jspider_decision (
     comment  LONGTEXT NOT NULL,
     PRIMARY KEY (resource, subject)
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
 
 --
 -- Table structure for table 'jspider_decision_step'
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS jspider_decision_step (
     comment  LONGTEXT NOT NULL,
     PRIMARY KEY (resource, subject, sequence)
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
 
 --
 -- Table structure for table 'jspider_email_address'
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS jspider_email_address (
     address VARCHAR(255) NOT NULL DEFAULT '',
     PRIMARY KEY (id)
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
 
 --
 -- Table structure for table 'jspider_email_address_reference'
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS jspider_email_address_reference (
     count    INT(11) NOT NULL DEFAULT '0',
     PRIMARY KEY (resource, address)
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
 
 --
 -- Table structure for table 'jspider_folder'
@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS jspider_folder (
     name   LONGTEXT NOT NULL,
     PRIMARY KEY (id)
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
 
 --
 -- Table structure for table 'jspider_resource'
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS jspider_resource (
     folder     INT(11)  NOT NULL DEFAULT '0',
     PRIMARY KEY (id)
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
 
 --
 -- Table structure for table 'jspider_resource_reference'
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS jspider_resource_reference (
     count   INT(11) NOT NULL DEFAULT '0',
     PRIMARY KEY (referer, referee)
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
 
 --
 -- Table structure for table 'jspider_site'
@@ -161,4 +161,4 @@ CREATE TABLE IF NOT EXISTS jspider_site (
     handle           INT(11)      NOT NULL DEFAULT '0',
     PRIMARY KEY (id)
 )
-    ENGINE =MyISAM;
+    ENGINE =InnoDB;
