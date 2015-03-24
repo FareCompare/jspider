@@ -1,0 +1,34 @@
+This document provides simple instructions for installing and running jspider.  For detailed instructions for running
+and customizing jspider please refer to the User Manual jspider-0-5-0-doc-user.pdf in this same directory.
+
+This is a copy of the jspider project found at http://j-spider.sourceforge.net/other/index.html and on Sourceforge at
+http://sourceforge.net/projects/j-spider/.  Minor customizations have been made for our local use.
+
+1. Build jspider
+   mvn clean install
+
+2. Deploy
+   The script deploy.sh is provided in the project home directory to copy the jspider runtime environment to a target
+   server.
+
+   Example ./deploy.sh myserver
+
+   The above example will create the directory /usr/local/jspider on the target server named myserver and will copy
+   the runtime and configuration directories into the /usr/local/jspider directory.
+
+3. Initialize the database output tables.
+   If you run the configuration named dboutput then you will first need to initialize the database tables.  The ddl
+   script jspiderdb.sql will be copied into the bin directory by the deploy script.  On the target server cd to the
+   bin directory and run the init_db.sh script.
+
+   Example: ./init_db.sh myuserid
+
+   The above will run mysql, logging on with the user "myuserid", and then run the jspiderdb.sql.  You will be prompted
+   for the password.
+
+4. Run jspider
+   From the bin directory run the jspider script passing in the site you want to crawl and the configuration to use.
+
+   Example:  ./jspider.sh http://www.mysite.com dboutput
+
+   The above will cause jspider to crawl the www.mysite.com site and write output to the tables created in step 3.
