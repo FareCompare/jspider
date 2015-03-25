@@ -10,15 +10,15 @@ import net.javacoding.jspider.core.throttle.Throttle;
  *
  * $Id: DistributedLoadThrottleImpl.java,v 1.2 2003/02/27 16:47:50 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  */
 public class DistributedLoadThrottleImpl implements Throttle {
 
     /** min. milliseconds between two subsequent calls. */
-    protected int milliseconds;
+    protected volatile int milliseconds;
 
     /** last allowed time for a fetch. */
-    protected long lastAllow;
+    protected volatile long lastAllow;
 
     /**
      * Constructor taking the amount of milliseconds to wait between
@@ -34,7 +34,7 @@ public class DistributedLoadThrottleImpl implements Throttle {
      * This method will block spider threads until they're allowed
      * to do a request.
      */
-    public synchronized void throttle() {
+    public void throttle() {
 
         long thisTime = System.currentTimeMillis();
         long scheduledTime = lastAllow + milliseconds;

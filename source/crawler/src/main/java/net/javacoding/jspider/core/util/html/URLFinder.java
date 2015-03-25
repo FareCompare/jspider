@@ -49,16 +49,15 @@ public class URLFinder {
             String uri = "";
             try {
                 uri = extractURL(line, pos + pattern.length());
-                if ( "javascript:".equals( uri ) ) {
-                    continue;
+                if ( !"javascript:".equals( uri ) ) {
+                    URL baseURL = callback.getContextURL();
+                    if ( ! URLUtil.isFileSpecified(baseURL)) {
+                        // Force a slash in case of a folder (to avoid buggy relative refs)
+                        baseURL = new URL(baseURL.toString() + "/");
+                    }
+                    URL foundURL = URLUtil.normalize(new URL(baseURL, uri));
+                    callback.urlFound(foundURL);
                 }
-                URL baseURL = callback.getContextURL();
-                if ( ! URLUtil.isFileSpecified(baseURL)) {
-                // Force a slash in case of a folder (to avoid buggy relative refs)
-                   baseURL = new URL(baseURL.toString() + "/");
-                }
-                URL foundURL = URLUtil.normalize(new URL(baseURL, uri));
-                callback.urlFound(foundURL);
             } catch (MalformedURLException e) {
                 callback.malformedUrlFound(uri);
             }

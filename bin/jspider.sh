@@ -27,9 +27,17 @@ export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/c3p0-0.9.1.2.jar"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/common"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$CLASSPATH"
 
+JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote"
+JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.port=9998"
+JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.ssl=false"
+JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.authenticate=false"
+
+DEBUG_PORT="4143"
+DEBUG="-agentlib:jdwp=transport=dt_socket,address=$DEBUG_PORT,server=y,suspend=n"
+
 DATE=$(date +"D%y%m%d-T%H%M%S")
 JFRFILE=$JSPIDER_HOME/output/jspider_${DATE}.jfr
 #JFR="-XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:+FlightRecorderOptions=\"filename=$JFRFILE,defaultrecording=true,delay=30s,duration=10m\""
 JFR="-XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:StartFlightRecording=filename=$JFRFILE,defaultrecording=true,delay=30s,duration=5m"
 
-java $JFR -cp $JSPIDER_CLASSPATH:$CLASSPATH $JSPIDER_OPTS net.javacoding.jspider.JSpider $1 $2
+java $JAVA_OPTS $DEBUG $JFR -cp $JSPIDER_CLASSPATH:$CLASSPATH $JSPIDER_OPTS net.javacoding.jspider.JSpider $1 $2

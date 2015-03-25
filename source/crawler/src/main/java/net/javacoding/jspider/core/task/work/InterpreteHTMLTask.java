@@ -21,7 +21,7 @@ import java.net.URL;
  *
  * $Id: InterpreteHTMLTask.java,v 1.15 2003/04/10 16:19:14 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  */
 public class InterpreteHTMLTask extends BaseWorkerTaskImpl implements URLFinderCallback {
 
@@ -41,12 +41,18 @@ public class InterpreteHTMLTask extends BaseWorkerTaskImpl implements URLFinderC
     }
 
     public void execute() {
+        String threadName = Thread.currentThread().getName();
+        String threadNameDetail = threadName + ":" + url.getFile() + ":";
+        Thread.currentThread().setName( threadNameDetail );
         CoreEvent event = null;
         try {
             InputStream inputStream = spideredResource.getInputStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
             String line = br.readLine();
+            int lineCount = 0;
             while (line != null) {
+                lineCount++;
+                Thread.currentThread().setName( threadNameDetail + lineCount );
                 URLFinder.findURLs(this, line);
                 line = br.readLine();
             }
@@ -58,7 +64,8 @@ public class InterpreteHTMLTask extends BaseWorkerTaskImpl implements URLFinderC
             LogFactory.getLog(InterpreteHTMLTask.class).error("exception during parse", e);
             event = new ResourceParsedErrorEvent(context, url, e);
         } finally {
-            notifyEvent(url, event );
+            Thread.currentThread().setName( threadName );
+            notifyEvent( url, event );
         }
     }
 
