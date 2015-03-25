@@ -10,18 +10,18 @@ import net.javacoding.jspider.core.logging.Log;
 
 /**
  * Throttle provider class for the Distributed Load Throttle implementation.
- * This class will generate throttle implementations when refernced from the
+ * This class will generate throttle implementations when referenced from the
  * configuration file (default).
  *
  * $Id: DistributedLoadThrottleProvider.java,v 1.7 2003/04/03 15:57:20 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  */
 public class DistributedLoadThrottleProvider implements ThrottleProvider {
 
     public static final String INTERVAL = "interval";
     public static final int INTERVAL_DEFAULT = 1000;
-    public static final int INTERVAL_MIN = 250;
+    public static final int INTERVAL_MIN = 50;
 
     /**
      * Method that instantiates the Throttle implementation.
@@ -35,11 +35,11 @@ public class DistributedLoadThrottleProvider implements ThrottleProvider {
         Log log = LogFactory.getLog(DistributedLoadThrottleProvider.class);
 
         if (interval < INTERVAL_MIN) {
-            log.warn("Throttle interval < " + INTERVAL_MIN + " ms is dangereous - set to minimum allowed of " + INTERVAL_MIN + " ms");
+            log.warn("Throttle interval < " + INTERVAL_MIN + " ms is dangerous - set to minimum allowed of " + INTERVAL_MIN + " ms");
             interval = INTERVAL_MIN;
         }
 
-        log.debug("throttle interval set to " + interval + " ms.");
+        log.info("throttle interval set to " + interval + " ms.");
 
         return new DistributedLoadThrottleImpl(interval);
     }
