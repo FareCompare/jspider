@@ -23,7 +23,13 @@ export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/velocity-dep-1.3.
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/commons-logging.jar"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/log4j-1.2.8.jar"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/mysql-connector-java-5.1.28.jar"
+export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/c3p0-0.9.1.2.jar"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/common"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$CLASSPATH"
 
-java -cp $JSPIDER_CLASSPATH:$CLASSPATH $JSPIDER_OPTS net.javacoding.jspider.JSpider $1 $2
+DATE=$(date +"D%y%m%d-T%H%M%S")
+JFRFILE=$JSPIDER_HOME/output/jspider_${DATE}.jfr
+#JFR="-XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:+FlightRecorderOptions=\"filename=$JFRFILE,defaultrecording=true,delay=30s,duration=10m\""
+JFR="-XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:StartFlightRecording=filename=$JFRFILE,defaultrecording=true,delay=30s,duration=5m"
+
+java $JFR -cp $JSPIDER_CLASSPATH:$CLASSPATH $JSPIDER_OPTS net.javacoding.jspider.JSpider $1 $2
