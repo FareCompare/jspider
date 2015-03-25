@@ -49,6 +49,9 @@ public class URLFinder {
             String uri = "";
             try {
                 uri = extractURL(line, pos + pattern.length());
+                if ( "javascript:".equals( uri ) ) {
+                    continue;
+                }
                 URL baseURL = callback.getContextURL();
                 if ( ! URLUtil.isFileSpecified(baseURL)) {
                 // Force a slash in case of a folder (to avoid buggy relative refs)
