@@ -36,8 +36,9 @@ class FolderDAOImpl implements FolderDAOSPI {
 
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection c = dbUtil.getConnection ( );
+        try (
+                Connection c = dbUtil.getConnection()
+        ) {
             st = c.createStatement();
             rs = st.executeQuery("select * from jspider_folder where parent=0 and site=" + site.getId());
             while ( rs.next() ) {
@@ -57,8 +58,9 @@ class FolderDAOImpl implements FolderDAOSPI {
 
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection c = dbUtil.getConnection ( );
+        try (
+                Connection c = dbUtil.getConnection()
+        ) {
             st = c.createStatement();
             rs = st.executeQuery("select * from jspider_folder where parent= " + folder.getId());
             while ( rs.next() ) {
@@ -77,8 +79,9 @@ class FolderDAOImpl implements FolderDAOSPI {
         FolderInternal folder = null;
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection c = dbUtil.getConnection ( );
+        try (
+                Connection c = dbUtil.getConnection()
+        ) {
             st = c.createStatement();
             rs = st.executeQuery("select * from jspider_folder where id=" + folderId);
             if ( rs.next() ) {
@@ -106,8 +109,9 @@ class FolderDAOImpl implements FolderDAOSPI {
 
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection c = dbUtil.getConnection ( );
+        try (
+                Connection c = dbUtil.getConnection()
+        ) {
             st = c.createStatement();
             st.executeUpdate("insert into jspider_folder ( id, parent, site, name ) values (" + id + "," + parentId + "," + siteId + ",'" + name + "')");
         } catch (SQLException e) {

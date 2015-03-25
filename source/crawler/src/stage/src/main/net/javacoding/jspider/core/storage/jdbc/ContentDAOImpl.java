@@ -26,8 +26,9 @@ class ContentDAOImpl implements ContentDAOSPI {
     }
 
     public void setBytes ( int id, byte[] bytes ) {
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             PreparedStatement ps = connection.prepareStatement("insert into jspider_content ( id, content ) values ( ?, ? )");
             ps.setInt(1, id);
             ps.setBytes(2, bytes);
@@ -47,8 +48,9 @@ class ContentDAOImpl implements ContentDAOSPI {
         byte[] bytes = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             ps = connection.prepareStatement("select content from jspider_content where id=?");
             ps.setInt(1, id);
             rs = ps.executeQuery();

@@ -22,13 +22,13 @@ class WorkerThread extends Thread {
 
 
     /** the current state of this thread - idle, blocked, or busy. */
-    private int workerState;
+    private volatile int workerState;
 
     /** Whether this instance is assigned a task. */
-    private boolean assigned;
+    private volatile boolean assigned;
 
     /** Whether we should keep alive this thread. */
-    private boolean running;
+    private volatile boolean running;
 
     /** Threadpool this worker is part of. */
     private WorkerThreadPool stp;
@@ -146,7 +146,7 @@ class WorkerThread extends Thread {
 
             }
             try {
-                wait();
+                wait(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

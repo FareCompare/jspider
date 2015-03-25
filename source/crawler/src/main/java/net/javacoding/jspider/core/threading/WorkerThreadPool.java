@@ -90,6 +90,10 @@ public class WorkerThreadPool extends ThreadGroup {
             WorkerThread thread = pool[i];
             if (thread.isOccupied()) {
                 occupied++;
+            } else {
+                synchronized (thread) {
+                    thread.notify();
+                }
             }
         }
         return (occupied * 100) / poolSize;

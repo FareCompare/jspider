@@ -39,8 +39,9 @@ class JdbcStorageImpl implements StorageSPI {
     }
 
     protected void clearDatabase ( DBUtil dbUtil ) {
-        Connection connection = dbUtil.getConnection();
-        try {
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             Statement st = connection.createStatement();
             st.executeUpdate("delete from jspider_site");
             st.executeUpdate("delete from jspider_resource");

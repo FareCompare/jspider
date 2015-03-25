@@ -19,14 +19,23 @@ import java.util.ArrayList;
 class ResourceDAOImpl implements ResourceDAOSPI {
 
     public static final String ATTRIBUTE_ID = "id";
-    public static final String ATTRIBUTE_SITE = "site";
+    public static final int ATTRIBUTE_ID_NDX = 1;
     public static final String ATTRIBUTE_URL = "url";
+    public static final int ATTRIBUTE_URL_NDX = 2;
     public static final String ATTRIBUTE_STATE = "state";
-    public static final String ATTRIBUTE_MIME = "mimetype";
-    public static final String ATTRIBUTE_TIME = "timems";
-    public static final String ATTRIBUTE_SIZE = "size";
-    public static final String ATTRIBUTE_FOLDER = "folder";
+    public static final int ATTRIBUTE_STATE_NDX = 3;
     public static final String ATTRIBUTE_HTTP_STATUS = "httpstatus";
+    public static final int ATTRIBUTE_HTTP_STATUS_NDX = 4;
+    public static final String ATTRIBUTE_SITE = "site";
+    public static final int ATTRIBUTE_SITE_NDX = 5;
+    public static final String ATTRIBUTE_TIME = "timems";
+    public static final int ATTRIBUTE_TIME_NDX = 6;
+    public static final String ATTRIBUTE_MIME = "mimetype";
+    public static final int ATTRIBUTE_MIME_NDX = 7;
+    public static final String ATTRIBUTE_SIZE = "size";
+    public static final int ATTRIBUTE_SIZE_NDX = 8;
+    public static final String ATTRIBUTE_FOLDER = "folder";
+    public static final int ATTRIBUTE_FOLDER_NDX = 9;
 
     protected DBUtil dbUtil;
     protected StorageSPI storage;
@@ -44,10 +53,11 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ResultSet rs = null;
         if (refererURL != null) {
             ResourceInternal referer = getResource(refererURL);
-            try {
+            try (
+                    Connection connection = dbUtil.getConnection();
+            ) {
                 int from = referer.getId();
                 int to = resource.getId();
-                Connection connection = dbUtil.getConnection();
 
                 st = connection.createStatement();
                 rs = st.executeQuery("select count(*) from jspider_resource_reference where referer = " + from + " and referee = " + to);
@@ -71,8 +81,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_resource");
             while (rs.next()) {
@@ -91,8 +102,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_resource, jspider_resource_reference where jspider_resource.id = jspider_resource_reference.referer and jspider_resource_reference.referee = " + resource.getId());
             while (rs.next()) {
@@ -111,8 +123,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select referer.url as referer, referee.url as referee, count from jspider_resource referer, jspider_resource referee, jspider_resource_reference where jspider_resource_reference.referer = " + resource.getId() + " and jspider_resource_reference.referee = referee.id and jspider_resource_reference.referer = referer.id");
             while (rs.next()) {
@@ -131,8 +144,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select referer.url as referer, referee.url as referee, count from jspider_resource referer, jspider_resource referee, jspider_resource_reference where jspider_resource_reference.referee = " + resource.getId() + " and jspider_resource_reference.referee = referee.id and jspider_resource_reference.referer = referer.id");
             while (rs.next()) {
@@ -151,20 +165,22 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_resource, jspider_resource_reference where jspider_resource.id = jspider_resource_reference.referee and jspider_resource_reference.referer = " + resource.getId());
-            while (rs.next()) {
-                al.add(createResourceFromRecord(rs));
+            rs = st.executeQuery(
+                    "select * from jspider_resource, jspider_resource_reference where jspider_resource.id = jspider_resource_reference.referee and jspider_resource_reference.referer = " + resource.getId() );
+            while ( rs.next() ) {
+                al.add( createResourceFromRecord( rs ) );
             }
-        } catch (SQLException e) {
-            log.error("SQLException", e);
+        } catch ( SQLException e ) {
+            log.error( "SQLException", e );
         } finally {
-            dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
+            dbUtil.safeClose( rs, log );
+            dbUtil.safeClose( st, log );
         }
-        return (ResourceInternal[]) al.toArray(new ResourceInternal[al.size()]);
+        return (ResourceInternal[]) al.toArray( new ResourceInternal[al.size()] );
     }
 
 
@@ -172,8 +188,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_resource where folder=" + folder.getId());
             while (rs.next()) {
@@ -192,8 +209,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_resource where site=" + site.getId());
             while (rs.next()) {
@@ -212,8 +230,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_resource where site=" + site.getId() + " and folder=0");
             while (rs.next()) {
@@ -275,8 +294,10 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ResourceInternal resource = null;
         Statement st = null;
         ResultSet rs = null;
-        try {
-            st = dbUtil.getConnection().createStatement();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
+            st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_resource where id='" + id + "'");
             if (rs.next()) {
                 resource = createResourceFromRecord(rs);
@@ -295,8 +316,10 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         Statement st = null;
         ResultSet rs = null;
         if (url != null) {
-            try {
-                st = dbUtil.getConnection().createStatement();
+            try (
+                    Connection connection = dbUtil.getConnection();
+            ) {
+                st = connection.createStatement();
                 rs = st.executeQuery("select * from jspider_resource where url='" + url + "'");
                 if (rs.next()) {
                     resource = createResourceFromRecord(rs);
@@ -312,7 +335,6 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     }
 
     public void create(int id, ResourceInternal resource) {
-        Connection connection = dbUtil.getConnection();
         StringBuffer sb = new StringBuffer();
         Statement st = null;
 
@@ -341,7 +363,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         int folderId = (folder == null) ? 0 : folder.getId();
         sb.append(DBUtil.format(folderId));
         sb.append(")");
-        try {
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             st.executeUpdate(sb.toString());
         } catch (SQLException e) {
@@ -352,7 +376,6 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     }
 
     public void save(ResourceInternal resource) {
-        Connection connection = dbUtil.getConnection();
         StringBuffer sb = new StringBuffer();
         Statement st = null;
         sb.append("update jspider_resource set ");
@@ -368,7 +391,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         sb.append(DBUtil.format(resource.getTimeMsInternal()));
         sb.append(" where id=");
         sb.append(DBUtil.format(resource.getId()));
-        try {
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             st.executeUpdate(sb.toString());
         } catch (SQLException e) {
@@ -379,15 +404,15 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     }
 
     protected ResourceInternal createResourceFromRecord(ResultSet rs) throws SQLException {
-        int id = rs.getInt(ATTRIBUTE_ID);
-        int folderId = rs.getInt(ATTRIBUTE_FOLDER);
-        int siteId = rs.getInt(ATTRIBUTE_SITE);
-        String urlString = rs.getString(ATTRIBUTE_URL);
-        int state = rs.getInt(ATTRIBUTE_STATE);
-        String mime = rs.getString(ATTRIBUTE_MIME);
-        int time = rs.getInt(ATTRIBUTE_TIME);
-        int size = rs.getInt(ATTRIBUTE_SIZE);
-        int httpStatus = rs.getInt(ATTRIBUTE_HTTP_STATUS);
+        int id = rs.getInt(ATTRIBUTE_ID_NDX);
+        int folderId = rs.getInt(ATTRIBUTE_FOLDER_NDX);
+        int siteId = rs.getInt(ATTRIBUTE_SITE_NDX);
+        String urlString = rs.getString(ATTRIBUTE_URL_NDX);
+        int state = rs.getInt(ATTRIBUTE_STATE_NDX);
+        String mime = rs.getString(ATTRIBUTE_MIME_NDX);
+        int time = rs.getInt(ATTRIBUTE_TIME_NDX);
+        int size = rs.getInt(ATTRIBUTE_SIZE_NDX);
+        int httpStatus = rs.getInt(ATTRIBUTE_HTTP_STATUS_NDX);
 
         FolderInternal folder = storage.getFolderDAO().findById(folderId);
 
