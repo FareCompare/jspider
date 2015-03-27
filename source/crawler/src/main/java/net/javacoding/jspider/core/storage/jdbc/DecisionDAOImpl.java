@@ -45,12 +45,10 @@ class DecisionDAOImpl implements DecisionDAOSPI {
     }
 
     protected void saveDecision ( int subject, ResourceInternal resource, DecisionInternal decision ) {
-        PreparedStatement ps = null;
-        PreparedStatement ps2 = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement("insert into jspider_decision ( resource, subject, type, comment ) values (?,?,?,?)");
         ) {
-            ps = connection.prepareStatement("insert into jspider_decision ( resource, subject, type, comment ) values (?,?,?,?)");
             ps.setInt(1, resource.getId());
             ps.setInt(2, (subject));
             ps.setInt(3, (decision.getDecision()));
@@ -58,23 +56,25 @@ class DecisionDAOImpl implements DecisionDAOSPI {
             ps.executeUpdate();
 
             DecisionStep[] steps = decision.getSteps();
-            for (int i = 0; i < steps.length; i++) {
-                DecisionStep step = steps[i];
-                ps2 = connection.prepareStatement("insert into jspider_decision_step ( resource, subject, sequence, type, rule, decision, comment ) values (?,?,?,?,?,?,?)");
-                ps2.setInt(1, resource.getId());
-                ps2.setInt(2, subject);
-                ps2.setInt(3, i);
-                ps2.setInt(4, (step.getRuleType())) ;
-                ps2.setString(5, (step.getRule()));
-                ps2.setInt(6, (step.getDecision()));
-                ps2.setString(7, (step.getComment()));
-                ps2.executeUpdate();
+            try (
+                    PreparedStatement ps2 = connection.prepareStatement("insert into jspider_decision_step ( resource, subject, sequence, type, rule, decision, comment ) values (?,?,?,?,?,?,?)");
+            ){
+                for (int i = 0; i < steps.length; i++) {
+                    DecisionStep step = steps[i];
+                    ps2.setInt(1, resource.getId());
+                    ps2.setInt(2, subject);
+                    ps2.setInt(3, i);
+                    ps2.setInt(4, (step.getRuleType())) ;
+                    ps2.setString(5, (step.getRule()));
+                    ps2.setInt(6, (step.getDecision()));
+                    ps2.setString(7, (step.getComment()));
+                    ps2.executeUpdate();
+                }
+            } catch ( SQLException e ) {
+                throw e;
             }
         } catch (SQLException e) {
             log.error("SQLException", e);
-        } finally{
-            dbUtil.safeClose(ps, log);
-            dbUtil.safeClose(ps2, log);
         }
     }
 
@@ -88,14 +88,13 @@ class DecisionDAOImpl implements DecisionDAOSPI {
 
     protected DecisionInternal findDecision ( int subject, ResourceInternal resource ) {
         DecisionInternal decision = null;
-        PreparedStatement ps = null;
-        PreparedStatement ps2 = null;
         ResultSet rs = null;
         ResultSet rs2 = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement("select * from jspider_decision where resource=? and subject=?");
+                PreparedStatement ps2 = connection.prepareStatement("select * from jspider_decision_step where resource=? and subject=? order by sequence");
         ) {
-            ps = connection.prepareStatement("select * from jspider_decision where resource=? and subject=?");
             ps.setInt(1, resource.getId());
             ps.setInt(2, subject);
             rs = ps.executeQuery();
@@ -104,7 +103,6 @@ class DecisionDAOImpl implements DecisionDAOSPI {
                 String comment = rs.getString(ATTRIBUTE_COMMENT);
                 decision = new DecisionInternal ( type, comment );
 
-                ps2 = connection.prepareStatement("select * from jspider_decision_step where resource=? and subject=? order by sequence");
                 ps2.setInt(1, resource.getId());
                 ps2.setInt(2, subject);
                 rs2 = ps2.executeQuery();
@@ -120,9 +118,7 @@ class DecisionDAOImpl implements DecisionDAOSPI {
             log.error("SQLException", e);
         } finally{
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(ps, log);
             dbUtil.safeClose(rs2, log);
-            dbUtil.safeClose(ps2, log);
         }
         return decision;
     }

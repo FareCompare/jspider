@@ -12,6 +12,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * $Id: ResourceDAOImpl.java,v 1.11 2003/04/19 19:00:46 vanrogu Exp $
@@ -41,6 +43,11 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     protected StorageSPI storage;
     protected Log log;
 
+    /** Resource cache. */
+    protected Map<URL, ResourceInternal> knownURLs = new ConcurrentHashMap<>(  );
+    protected Map<Integer, ResourceInternal> byId = new ConcurrentHashMap<>(  );
+
+
     public ResourceDAOImpl(StorageSPI storage, DBUtil dbUtil) {
         this.storage = storage;
         this.dbUtil = dbUtil;
@@ -53,21 +60,17 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ResultSet rs = null;
         if (refererURL != null) {
             ResourceInternal referer = getResource(refererURL);
+            String sql = "INSERT INTO jspider_resource_reference ( referer, referee, count ) VALUES (?,?,1) " +
+                         "    ON DUPLICATE KEY UPDATE count = count+1";
             try (
                     Connection connection = dbUtil.getConnection();
+                    PreparedStatement ps = connection.prepareStatement( sql )
             ) {
                 int from = referer.getId();
                 int to = resource.getId();
-
-                st = connection.createStatement();
-                rs = st.executeQuery("select count(*) from jspider_resource_reference where referer = " + from + " and referee = " + to);
-                rs.next();
-                Statement st2 = connection.createStatement();
-                if (rs.getInt(1) == 0) {
-                    st2.executeUpdate("insert into jspider_resource_reference ( referer, referee, count ) values (" + from + "," + to + ", 1)");
-                } else {
-                    st2.executeUpdate("update jspider_resource_reference set count = count + 1 where referer = " + from + " and referee = " + to);
-                }
+                ps.setInt( 1, from );
+                ps.setInt( 2, to );
+                ps.executeUpdate();
             } catch (SQLException e) {
                 log.error("SQLException", e);
             } finally {
@@ -291,7 +294,11 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     }
 
     public ResourceInternal getResource(int id) {
-        ResourceInternal resource = null;
+        ResourceInternal resource = byId.get( id );
+        if ( resource != null ) {
+            return resource;
+        }
+
         Statement st = null;
         ResultSet rs = null;
         try (
@@ -312,7 +319,11 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     }
 
     public ResourceInternal getResource(URL url) {
-        ResourceInternal resource = null;
+        ResourceInternal resource = knownURLs.get( url );
+        if ( resource != null ) {
+            return resource;
+        }
+
         Statement st = null;
         ResultSet rs = null;
         if (url != null) {
@@ -335,71 +346,52 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     }
 
     public void create(int id, ResourceInternal resource) {
-        StringBuffer sb = new StringBuffer();
-        Statement st = null;
+        // cache in memory
+        knownURLs.put( resource.getURL(), resource );
+        byId.put( id, resource );
 
-        sb.append("insert into jspider_resource (");
-        sb.append("id,");
-        sb.append("url,");
-        sb.append("site,");
-        sb.append("state,");
-        sb.append("httpstatus,");
-        sb.append("timems,");
-        sb.append("folder");
-        sb.append(") values (");
-        sb.append(DBUtil.format(id));
-        sb.append(",");
-        sb.append(DBUtil.format(resource.getURL()));
-        sb.append(",");
-        sb.append(DBUtil.format(resource.getSiteId()));
-        sb.append(",");
-        sb.append(DBUtil.format(resource.getState()));
-        sb.append(",");
-        sb.append(DBUtil.format(resource.getHttpStatusInternal()));
-        sb.append(",");
-        sb.append(DBUtil.format(resource.getTimeMsInternal()));
-        sb.append(",");
-        FolderInternal folder = (FolderInternal) resource.getFolder();
-        int folderId = (folder == null) ? 0 : folder.getId();
-        sb.append(DBUtil.format(folderId));
-        sb.append(")");
+        String sql = "insert into jspider_resource (id,url,site,state,httpstatus,timems,folder) values (?,?,?,?,?,?,?)";
+
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            st.executeUpdate(sb.toString());
+            int i = 0;
+            ps.setInt( ++i, id );
+            ps.setString( ++i, String.valueOf( resource.getURL() ) );
+            ps.setInt( ++i, resource.getSiteId() );
+            ps.setInt( ++i, resource.getState() );
+            ps.setInt( ++i, resource.getHttpStatusInternal() );
+            ps.setInt( ++i, resource.getTimeMsInternal() );
+            FolderInternal folder = (FolderInternal) resource.getFolder();
+            int folderId = (folder == null) ? 0 : folder.getId();
+            ps.setInt( ++i, folderId );
+            ps.executeUpdate();
         } catch (SQLException e) {
-            log.error("SQLException", e);
-        } finally {
-            dbUtil.safeClose(st, log);
+            throw new RuntimeException( "Failed to create ResourceInternal: " + resource + ", id=" + id, e );
         }
     }
 
     public void save(ResourceInternal resource) {
-        StringBuffer sb = new StringBuffer();
-        Statement st = null;
-        sb.append("update jspider_resource set ");
-        sb.append("state=");
-        sb.append(DBUtil.format(resource.getState()));
-        sb.append(",mimetype=");
-        sb.append(DBUtil.format(resource.getMimeInternal()));
-        sb.append(",httpstatus=");
-        sb.append(DBUtil.format(resource.getHttpStatusInternal()));
-        sb.append(",size=");
-        sb.append(DBUtil.format(resource.getSizeInternal()));
-        sb.append(",timems=");
-        sb.append(DBUtil.format(resource.getTimeMsInternal()));
-        sb.append(" where id=");
-        sb.append(DBUtil.format(resource.getId()));
+        // cache in memory
+        knownURLs.put( resource.getURL(), resource );
+        byId.put( resource.getId(), resource );
+
+        String sql = "update jspider_resource set state=?,mimetype=?,httpstatus=?,size=?,timems=? where id=?";
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            st.executeUpdate(sb.toString());
+            int i = 0;
+            ps.setInt( ++i, resource.getState() );
+            ps.setString( ++i, resource.getMimeInternal() );
+            ps.setInt( ++i, resource.getHttpStatusInternal() );
+            ps.setInt( ++i, resource.getSizeInternal() );
+            ps.setInt( ++i, resource.getTimeMsInternal() );
+            ps.setInt( ++i, resource.getId() );
+            ps.executeUpdate();
         } catch (SQLException e) {
-            log.error("SQLException", e);
-        } finally {
-            dbUtil.safeClose(st, log);
+            throw new RuntimeException( "Failed to save ResourceInternal: " + resource, e );
         }
     }
 
