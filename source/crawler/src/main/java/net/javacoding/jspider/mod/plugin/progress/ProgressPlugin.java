@@ -27,6 +27,7 @@ import net.javacoding.jspider.api.event.site.SiteRelatedEvent;
 import net.javacoding.jspider.api.event.site.UserAgentObeyedEvent;
 import net.javacoding.jspider.core.logging.Log;
 import net.javacoding.jspider.core.logging.LogFactory;
+import net.javacoding.jspider.core.util.config.PropertySet;
 import net.javacoding.jspider.spi.Plugin;
 
 import java.util.concurrent.TimeUnit;
@@ -39,17 +40,25 @@ import java.util.concurrent.TimeUnit;
  */
 public class ProgressPlugin implements Plugin, EventVisitor {
 
-    private String prefix = "[Progress] ";
+    protected static final int DEFAULT_REPORTINTERVAL = 30000;
     private long startTime;
-    private long nextReportTime;
-    private long reportInterval = TimeUnit.SECONDS.toMillis( 30 );
+//    private long nextReportTime;
+    private long reportInterval = DEFAULT_REPORTINTERVAL;
 
     private Log log = LogFactory.getLog( this.getClass() );
 
     private int resourceDiscoveredCount;
     private int malformedUrlCount;
+    private int fetchErrorCount;
+
+    private ProgressThread progressThread;
 
     public ProgressPlugin() {
+    }
+
+    public ProgressPlugin( PropertySet config ) {
+        reportInterval = config.getInteger( "progress.interval", DEFAULT_REPORTINTERVAL );
+        log.info( "reportInterval set to " + reportInterval );
     }
 
     @Override
@@ -79,59 +88,62 @@ public class ProgressPlugin implements Plugin, EventVisitor {
 
     @Override
     public void notify( JSpiderEvent event ) {
-
+        event.accept(this);
     }
 
     @Override
     public void shutdown() {
         log.info( "shutdown" );
+        reportProgress();
     }
 
     @Override
     public void visit( EMailAddressDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( JSpiderEvent event ) {
-        println(event);
+//        println(event);
     }
 
     @Override
     public void visit( EngineRelatedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( SpideringStartedEvent event ) {
         startTime = System.currentTimeMillis();
-        nextReportTime = startTime + reportInterval;
-        println( "ProgressPlugin received SpideringStartedEvent event" );
+//        nextReportTime = startTime + reportInterval;
+        progressThread = new ProgressThread();
+        println( "SpideringStartedEvent event" );
     }
 
     @Override
     public void visit( SpideringStoppedEvent event ) {
-        println( "ProgressPlugin received SpideringStoppedEvent event, duration " + duration() );
+        println( "SpideringStoppedEvent event, duration " + duration() );
+        reportProgress();
     }
 
     @Override
     public void visit( FolderRelatedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( FolderDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceRelatedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( EMailAddressReferenceDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
@@ -141,82 +153,82 @@ public class ProgressPlugin implements Plugin, EventVisitor {
 
     @Override
     public void visit( MalformedBaseURLFoundEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceDiscoveredEvent event ) {
         resourceDiscoveredCount++;
-        long currentTime = System.currentTimeMillis();
-        if ( currentTime >= nextReportTime ) {
-            reportProgress();
-            nextReportTime = currentTime + reportInterval;
-        }
+//        long currentTime = System.currentTimeMillis();
+//        if ( currentTime >= nextReportTime ) {
+//            reportProgress();
+//            nextReportTime = currentTime + reportInterval;
+//        }
     }
 
     @Override
     public void visit( ResourceFetchedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceFetchErrorEvent event ) {
-        //todo implement
+        fetchErrorCount++;
     }
 
     @Override
     public void visit( ResourceForbiddenEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceParsedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceIgnoredForFetchingEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceIgnoredForParsingEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceReferenceDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( SiteRelatedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( SiteDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( RobotsTXTMissingEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( RobotsTXTFetchedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( UserAgentObeyedEvent event ) {
-        //todo implement
+
     }
 
     private void reportProgress() {
-        println( String.format( "Discovered %,d resources, %,d malformed, duration %s",
-                                 resourceDiscoveredCount, malformedUrlCount, duration() ) );
+        println( String.format( "Discovered %,d resources, %,d errors, %,d malformed, duration %s",
+                                resourceDiscoveredCount, fetchErrorCount, malformedUrlCount, duration() ) );
     }
 
     private String duration() {
@@ -238,11 +250,34 @@ public class ProgressPlugin implements Plugin, EventVisitor {
         final long seconds = duration / ONE_SECOND;
         final long milli = duration % ONE_SECOND;
 
-        return String.format( "%02d:%02d:%02d.%03d%n", hours, minutes, seconds, milli );
+        return String.format( "%02d:%02d:%02d.%03d", hours, minutes, seconds, milli );
     }
 
     protected void println(Object object) {
-        System.out.println(prefix + object);
+        System.out.println( "[Progress] " + object);
     }
 
+    private class ProgressThread extends Thread {
+        private volatile boolean running;
+
+        public ProgressThread() {
+            super( "ProgressPlugin.ProgressThread" );
+        }
+        public void terminate() {
+            running = false;
+            interrupt();
+        }
+
+        public void run() {
+            running = true;
+            while ( running ) {
+                try {
+                    sleep( reportInterval );
+                } catch ( InterruptedException e ) {
+                    // ignore
+                }
+                reportProgress();
+            }
+        }
+    }
 }
