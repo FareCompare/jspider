@@ -117,12 +117,14 @@ public class ProgressPlugin implements Plugin, EventVisitor {
         startTime = System.currentTimeMillis();
 //        nextReportTime = startTime + reportInterval;
         progressThread = new ProgressThread();
+        progressThread.start();
         println( "SpideringStartedEvent event" );
     }
 
     @Override
     public void visit( SpideringStoppedEvent event ) {
         println( "SpideringStoppedEvent event, duration " + duration() );
+        progressThread.terminate();
         reportProgress();
     }
 
@@ -278,6 +280,7 @@ public class ProgressPlugin implements Plugin, EventVisitor {
                 }
                 reportProgress();
             }
+            println( getClass().getSimpleName() + " stopped." );
         }
     }
 }
