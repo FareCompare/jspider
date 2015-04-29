@@ -131,8 +131,9 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection()
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select referer.url as referer, referee.url as referee, count from jspider_resource referer, jspider_resource referee, jspider_resource_reference where jspider_resource_reference.referee = " + resource.getId() + " and jspider_resource_reference.referee = referee.id and jspider_resource_reference.referer = referer.id");
             while (rs.next()) {

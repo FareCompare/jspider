@@ -27,6 +27,7 @@ export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/c3p0-0.9.1.2.jar"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/common"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$CLASSPATH"
 
+JAVA_OPTS="-Xmx16G"
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote"
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.port=9998"
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.ssl=false"

@@ -47,8 +47,9 @@ class DecisionDAOImpl implements DecisionDAOSPI {
     protected void saveDecision ( int subject, ResourceInternal resource, DecisionInternal decision ) {
         PreparedStatement ps = null;
         PreparedStatement ps2 = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             ps = connection.prepareStatement("insert into jspider_decision ( resource, subject, type, comment ) values (?,?,?,?)");
             ps.setInt(1, resource.getId());
             ps.setInt(2, (subject));
@@ -91,8 +92,9 @@ class DecisionDAOImpl implements DecisionDAOSPI {
         PreparedStatement ps2 = null;
         ResultSet rs = null;
         ResultSet rs2 = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             ps = connection.prepareStatement("select * from jspider_decision where resource=? and subject=?");
             ps.setInt(1, resource.getId());
             ps.setInt(2, subject);

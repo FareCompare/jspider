@@ -11,7 +11,7 @@ import java.sql.*;
 /**
  * $Id: JdbcStorageImpl.java,v 1.8 2003/04/11 16:37:06 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  *
  * @todo DAO's need caching - definitely !
  * @todo find a good way of cleaning the store at spidering start or layering it per spider session
@@ -39,8 +39,9 @@ class JdbcStorageImpl implements StorageSPI {
     }
 
     protected void clearDatabase ( DBUtil dbUtil ) {
-        Connection connection = dbUtil.getConnection();
-        try {
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             Statement st = connection.createStatement();
             st.executeUpdate("delete from jspider_site");
             st.executeUpdate("delete from jspider_resource");

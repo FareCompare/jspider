@@ -26,12 +26,13 @@ class EMailAddressDAOImpl implements EMailAddressDAOSPI {
     }
 
     public void register(ResourceInternal resource, EMailAddressInternal address) {
-        Connection connection = dbUtil.getConnection();
 
         Statement st = null;
         ResultSet rs = null;
 
-        try {
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select count(*) as count from jspider_email_address where address='" + address.getAddress() + "'");
             rs.next();
@@ -65,8 +66,9 @@ class EMailAddressDAOImpl implements EMailAddressDAOSPI {
         Statement st = null;
         ResultSet rs = null;
         EMailAddressInternal emailAddress = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_email_address where address = '" + address + "'");
             while (rs.next()) {
@@ -85,8 +87,9 @@ class EMailAddressDAOImpl implements EMailAddressDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select address.id, address.address from jspider_email_address address, jspider_email_address_reference ref where ref.address=address.id and ref.resource=" + resource.getId());
             while (rs.next()) {
@@ -105,8 +108,9 @@ class EMailAddressDAOImpl implements EMailAddressDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection connection = dbUtil.getConnection();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             rs = st.executeQuery("select jspider_email_address.address, jspider_email_address_reference.resource, jspider_email_address_reference.count from jspider_email_address, jspider_email_address_reference where jspider_email_address_reference.resource=" + resource.getId() + " and jspider_email_address_reference.address = jspider_email_address.id");
             while (rs.next()) {

@@ -42,9 +42,10 @@ class SiteDAOImpl implements SiteDAOSPI {
         SiteInternal site = null;
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection c = dbUtil.getConnection();
-            st = c.createStatement();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
+            st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_site where host = '" + siteURL.getHost() + "' and port = " + siteURL.getPort());
             if (rs.next()) {
                 site = createSiteFromRecord(rs);
@@ -64,9 +65,10 @@ class SiteDAOImpl implements SiteDAOSPI {
         SiteInternal site = null;
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection c = dbUtil.getConnection();
-            st = c.createStatement();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
+            st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_site id=" + id);
             if (rs.next()) {
                 site = createSiteFromRecord(rs);
@@ -83,7 +85,6 @@ class SiteDAOImpl implements SiteDAOSPI {
     }
 
     public void create(int id, SiteInternal site) {
-        Connection connection = dbUtil.getConnection();
         Statement st = null;
         StringBuffer sb = new StringBuffer();
         sb.append("insert into jspider_site (");
@@ -121,7 +122,9 @@ class SiteDAOImpl implements SiteDAOSPI {
         sb.append(",");
         sb.append(DBUtil.format(site.getUserAgent()));
         sb.append(")");
-        try {
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             st.executeUpdate(sb.toString());
         } catch (SQLException e) {
@@ -133,7 +136,6 @@ class SiteDAOImpl implements SiteDAOSPI {
 
     public void save(int id, SiteInternal site) {
         StringBuffer sb = new StringBuffer();
-        Connection connection = dbUtil.getConnection();
         Statement st = null;
         sb.append("update jspider_site set ");
         sb.append("handle=");
@@ -154,7 +156,9 @@ class SiteDAOImpl implements SiteDAOSPI {
         sb.append(DBUtil.format(site.getUserAgent()));
         sb.append(" where id = ");
         sb.append(DBUtil.format(id));
-        try {
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
             st = connection.createStatement();
             st.executeUpdate(sb.toString());
         } catch (SQLException e) {
@@ -168,9 +172,10 @@ class SiteDAOImpl implements SiteDAOSPI {
         ArrayList al = new ArrayList();
         Statement st = null;
         ResultSet rs = null;
-        try {
-            Connection c = dbUtil.getConnection();
-            st = c.createStatement();
+        try (
+                Connection connection = dbUtil.getConnection();
+        ) {
+            st = connection.createStatement();
             rs = st.executeQuery("select * from jspider_site");
             while (rs.next()) {
                 al.add(createSiteFromRecord(rs));
