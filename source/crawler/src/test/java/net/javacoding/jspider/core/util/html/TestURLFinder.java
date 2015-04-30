@@ -21,8 +21,10 @@ public class TestURLFinder {
 
     @Before
     public void setup() throws Exception {
-        inputStream = getClass().getClassLoader().getResourceAsStream( "sobre.html" );
-        url = new URL( "http://www.farecompare.mx//sobre.html" );
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "sobre.html" );
+//        url = new URL( "http://www.farecompare.mx//sobre.html" );
+        inputStream = getClass().getClassLoader().getResourceAsStream( "NYC-BOS-market.html" );
+        url = new URL( "http://www.farecompare.com/flights/New_York-NYC/Boston-BOS/market.html" );
     }
 
     @Test

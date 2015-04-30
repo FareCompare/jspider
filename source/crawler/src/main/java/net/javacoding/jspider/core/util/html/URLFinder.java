@@ -68,8 +68,15 @@ public class URLFinder {
     protected static String extractURL(String string, int pos) {
         char c = string.charAt(pos);
         String ret = "";
-        if (c == '\'' || c == '"') {
+
+        // This was broken when parsing a url with an embedded apostrophe like <a href="Martha's_Vineyard-MVY/Boston-BOS/market.html">
+        String tokens = " \"\'>";
+        if (c == '\'' ) {
             string = string.substring(pos + 1);
+            tokens = " \'>";
+        } else if ( c == '"') {
+            string = string.substring(pos + 1);
+            tokens = " \">";
         } else {
             string = string.substring(pos);
         }
@@ -78,8 +85,12 @@ public class URLFinder {
             if (c == '\'' || c == '\"' || c == '>') {
                 ret = "";
             } else {
-                StringTokenizer st = new StringTokenizer(string, " \"\'>");
+                StringTokenizer st = new StringTokenizer(string, tokens);
                 ret = st.nextToken();
+                c = ret.charAt( ret.length() - 1 );
+                if ( c == '\'' || c == '"' ) {
+                    ret = ret.substring( 0, ret.length() - 1 );
+                }
             }
         }
         int p = ret.indexOf('#');

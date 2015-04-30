@@ -257,4 +257,12 @@ public class URLFinderTest extends TestCase implements URLFinderCallback {
         assertEquals("lastURL is wrong", "http://www.somehost.com/folder/index.html", lastURL.toString());
     }
 
+    public void testUrlHasApostrophe() {
+        URLFinder.findURLs(this,  "this is a line <base href=\"http://www.somehost.com/Martha's_Vineyard-MVY/Boston-BOS/market.html\">Martha's Vinyard</a> is wellformed");
+        int expected = 1;
+        int malformedExpected = 0;
+        assertEquals("actual nr of urls found differs from expected", expected, count);
+        assertEquals("number of malformed URLs reported differs from expected", malformedExpected, malformed);
+        assertEquals("lastURL is wrong", "http://www.somehost.com/Martha's_Vineyard-MVY/Boston-BOS/market.html", lastURL.toString());
+    }
 }
