@@ -8,6 +8,8 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
    mvn clean install
 
 2. Deploy
+   Update the jspider.properties  to indicate the storage provider and database information.
+
    The script deploy.sh is provided in the project home directory to copy the jspider runtime environment to a target
    server.
 
@@ -37,16 +39,28 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
    Output is written to the seo_spider database. You can use the below query to list errors and what page they were
    referred by.
 
-    select r1.id, r1.url, r1.httpstatus, r2.id, r2.url as referer
-     from jspider_resource r1, jspider_resource r2, jspider_resource_reference x
-    where r1.id = x.referee
-      and r2.id = referer
-      and r1.httpstatus <> 0
-      and r1.httpstatus <> 200 order by 1;
+    -- counts by httpstatus
+    SELECT httpstatus, COUNT(*) FROM jspider_resource GROUP BY 1 UNION SELECT 'TOTAL', COUNT(*) FROM jspider_resource;
 
-   This query will show what url in the url_validation table were not crawled. - Farecompare only
-      select count(*) from (
-      select uri from seo_ml.url_validation where siteCode = 4 and returnCode = 200 and uri not in(
-             select substr(url from length('http://www.farecompare.mx/')) as part
-               from seo_spider.jspider_resource where url like 'http://www.farecompare.mx/%')
-               ) t;
+    -- show non 200 urls and their referer
+    SELECT 'id', 'url', 'httpstatus', 'id', 'referer'
+    UNION (
+    SELECT r1.id, r1.url, r1.httpstatus, r2.id, r2.url as referer
+      INTO OUTFILE '/usr/local/jspider/output/non_200_report.csv'
+           FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+           LINES TERMINATED BY '\n'
+      FROM jspider_resource r1, jspider_resource r2, jspider_resource_reference x
+     WHERE r1.id = x.referee
+       AND r2.id = referer
+       AND r1.httpstatus <> 0
+       AND r1.httpstatus <> 200
+       AND r1.url like 'http://www.farecompare.com/flights/%'
+     ORDER BY 1
+     );
+
+    -- This query will show what url in the url_validation table were not crawled. - Farecompare only
+    SELECT COUNT(*) FROM (
+    SELECT uri FROM seo_ml.url_validation WHERE siteCode = 4 AND returnCode = 200 AND uri NOT IN(
+           SELECT SUBSTR(url from length('http://www.farecompare.mx/')) as part
+             FROM seo_spider.jspider_resource WHERE url LIKE 'http://www.farecompare.mx/%')
+             ) t;
