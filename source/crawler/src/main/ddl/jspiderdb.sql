@@ -117,7 +117,9 @@ CREATE TABLE IF NOT EXISTS jspider_folder (
     parent INT(11)  NOT NULL DEFAULT '0',
     site   INT(11)  NOT NULL DEFAULT '0',
     name   LONGTEXT NOT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    KEY parentIdx (parent),
+    KEY siteIdx (site)
 )
     ENGINE =InnoDB;
 
