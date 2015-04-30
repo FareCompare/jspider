@@ -82,13 +82,13 @@ class ResourceDAOImpl implements ResourceDAOSPI {
 
     public ResourceInternal[] findAllResources() {
         ArrayList al = new ArrayList();
-        Statement st = null;
+        String sql = "select * from jspider_resource";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_resource");
+            rs = ps.executeQuery();
             while (rs.next()) {
                 al.add(createResourceFromRecord(rs));
             }
@@ -96,20 +96,20 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
         return (ResourceInternal[]) al.toArray(new ResourceInternal[al.size()]);
     }
 
     public ResourceInternal[] getRefereringResources(ResourceInternal resource) {
         ArrayList al = new ArrayList();
-        Statement st = null;
+        String sql = "select * from jspider_resource, jspider_resource_reference where jspider_resource.id = jspider_resource_reference.referer and jspider_resource_reference.referee = ?";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_resource, jspider_resource_reference where jspider_resource.id = jspider_resource_reference.referer and jspider_resource_reference.referee = " + resource.getId());
+            ps.setInt( 1, resource.getId() );
+            rs = ps.executeQuery();
             while (rs.next()) {
                 al.add(createResourceFromRecord(rs));
             }
@@ -117,20 +117,20 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
         return (ResourceInternal[]) al.toArray(new ResourceInternal[al.size()]);
     }
 
     public ResourceReferenceInternal[] getOutgoingReferences(ResourceInternal resource) {
         ArrayList al = new ArrayList();
-        Statement st = null;
+        String sql = "select referer.url as referer, referee.url as referee, count from jspider_resource referer, jspider_resource referee, jspider_resource_reference where jspider_resource_reference.referer = ? and jspider_resource_reference.referee = referee.id and jspider_resource_reference.referer = referer.id";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select referer.url as referer, referee.url as referee, count from jspider_resource referer, jspider_resource referee, jspider_resource_reference where jspider_resource_reference.referer = " + resource.getId() + " and jspider_resource_reference.referee = referee.id and jspider_resource_reference.referer = referer.id");
+            ps.setInt( 1, resource.getId() );
+            rs = ps.executeQuery();
             while (rs.next()) {
                 al.add(createResourceReferenceFromRecord(rs));
             }
@@ -138,20 +138,20 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
         return (ResourceReferenceInternal[]) al.toArray(new ResourceReferenceInternal[al.size()]);
     }
 
     public ResourceReferenceInternal[] getIncomingReferences(ResourceInternal resource) {
         ArrayList al = new ArrayList();
-        Statement st = null;
+        String sql = "select referer.url as referer, referee.url as referee, count from jspider_resource referer, jspider_resource referee, jspider_resource_reference where jspider_resource_reference.referee = ? and jspider_resource_reference.referee = referee.id and jspider_resource_reference.referer = referer.id";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select referer.url as referer, referee.url as referee, count from jspider_resource referer, jspider_resource referee, jspider_resource_reference where jspider_resource_reference.referee = " + resource.getId() + " and jspider_resource_reference.referee = referee.id and jspider_resource_reference.referer = referer.id");
+            ps.setInt( 1, resource.getId() );
+            rs = ps.executeQuery();
             while (rs.next()) {
                 al.add(createResourceReferenceFromRecord(rs));
             }
@@ -159,21 +159,20 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
         return (ResourceReferenceInternal[]) al.toArray(new ResourceReferenceInternal[al.size()]);
     }
 
     public ResourceInternal[] getReferencedResources(ResourceInternal resource) {
         ArrayList al = new ArrayList();
-        Statement st = null;
+        String sql = "select * from jspider_resource, jspider_resource_reference where jspider_resource.id = jspider_resource_reference.referee and jspider_resource_reference.referer = ?";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery(
-                    "select * from jspider_resource, jspider_resource_reference where jspider_resource.id = jspider_resource_reference.referee and jspider_resource_reference.referer = " + resource.getId() );
+            ps.setInt( 1, resource.getId() );
+            rs = ps.executeQuery();
             while ( rs.next() ) {
                 al.add( createResourceFromRecord( rs ) );
             }
@@ -181,21 +180,20 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             log.error( "SQLException", e );
         } finally {
             dbUtil.safeClose( rs, log );
-            dbUtil.safeClose( st, log );
         }
         return (ResourceInternal[]) al.toArray( new ResourceInternal[al.size()] );
     }
 
-
     public ResourceInternal[] findByFolder(FolderInternal folder) {
         ArrayList al = new ArrayList();
-        Statement st = null;
+        String sql = "select * from jspider_resource where folder=?";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_resource where folder=" + folder.getId());
+            ps.setInt( 1, folder.getId() );
+            rs = ps.executeQuery();
             while (rs.next()) {
                 al.add(createResourceFromRecord(rs));
             }
@@ -203,20 +201,20 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
         return (ResourceInternal[]) al.toArray(new ResourceInternal[al.size()]);
     }
 
     public ResourceInternal[] getBySite(SiteInternal site) {
         ArrayList al = new ArrayList();
-        Statement st = null;
+        String sql = "select * from jspider_resource where site=?";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_resource where site=" + site.getId());
+            ps.setInt( 1, site.getId() );
+            rs = ps.executeQuery();
             while (rs.next()) {
                 al.add(createResourceFromRecord(rs));
             }
@@ -224,20 +222,20 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
         return (ResourceInternal[]) al.toArray(new ResourceInternal[al.size()]);
     }
 
     public ResourceInternal[] getRootResources(SiteInternal site) {
         ArrayList al = new ArrayList();
-        Statement st = null;
+        String sql = "select * from jspider_resource where site=? and folder=0";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_resource where site=" + site.getId() + " and folder=0");
+            ps.setInt( 1, site.getId() );
+            rs = ps.executeQuery();
             while (rs.next()) {
                 al.add(createResourceFromRecord(rs));
             }
@@ -245,7 +243,6 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
         return (ResourceInternal[]) al.toArray(new ResourceInternal[al.size()]);
     }
@@ -299,21 +296,22 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             return resource;
         }
 
-        Statement st = null;
+        String sql = "select * from jspider_resource where id=?";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_resource where id='" + id + "'");
+            ps.setInt( 1, id );
+            rs = ps.executeQuery( );
             if (rs.next()) {
                 resource = createResourceFromRecord(rs);
+                byId.put( id, resource );
             }
         } catch (SQLException e) {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
         return resource;
     }
@@ -324,22 +322,23 @@ class ResourceDAOImpl implements ResourceDAOSPI {
             return resource;
         }
 
-        Statement st = null;
+        String sql = "select * from jspider_resource where url=?";
         ResultSet rs = null;
         if (url != null) {
             try (
                     Connection connection = dbUtil.getConnection();
+                    PreparedStatement ps = connection.prepareStatement( sql )
             ) {
-                st = connection.createStatement();
-                rs = st.executeQuery("select * from jspider_resource where url='" + url + "'");
+                ps.setString( 1, url.toString() );
+                rs = ps.executeQuery();
                 if (rs.next()) {
                     resource = createResourceFromRecord(rs);
+                    knownURLs.put( url, resource );
                 }
             } catch (SQLException e) {
                 log.error("SQLException", e);
             } finally {
                 dbUtil.safeClose(rs, log);
-                dbUtil.safeClose(st, log);
             }
         }
         return resource;
