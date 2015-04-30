@@ -17,7 +17,7 @@ import java.util.*;
  *
  * $Id: ResourceInternal.java,v 1.13 2003/04/11 16:37:04 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  */
 public class ResourceInternal implements ParsedResource, ParseErrorResource, ParseIgnoredResource, ForbiddenResource, FetchIgnoredResource, FetchErrorResource {
 
@@ -64,7 +64,12 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
     public void setFetched(int httpStatus, int size, int timeMs, String mimeType, Date fetchTime, HTTPHeader[] headers) {
         if (state != Resource.STATE_DISCOVERED) {
             LogFactory.getLog(Resource.class).error("error in state transition for resource " + url + ":\n" + this);
-            throw new InvalidStateTransitionException("cannot set resource fetched - it's not in the discovered state - was " + state);
+            if ( state != Resource.STATE_PARSE_IGNORED ) {
+                throw new InvalidStateTransitionException("cannot set resource fetched - it's not in the discovered state - was " + state);
+            } else {
+                LogFactory.getLog(Resource.class).error("ignoring setFetched for " + url );
+                return;
+            }
         }
         this.httpStatus = httpStatus;
         this.size = size;
@@ -78,7 +83,12 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
     public void setFetchError(int httpStatus, HTTPHeader[] headers) {
         if (state != Resource.STATE_DISCOVERED && state != Resource.STATE_FETCH_ERROR) {
             LogFactory.getLog(Resource.class).error("error in state transition for resource " + url + ":\n" + this);
-            throw new InvalidStateTransitionException("cannot set resource fetch error - it's not in the discovered state - was" + state);
+            if ( state != Resource.STATE_PARSE_IGNORED ) {
+                throw new InvalidStateTransitionException("cannot set resource fetch error - it's not in the discovered state - was" + state);
+            } else {
+                LogFactory.getLog(Resource.class).error("ignoring setFetchError for " + url );
+                return;
+            }
         }
         this.httpStatus = httpStatus;
         this.headers = headers;
