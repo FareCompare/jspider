@@ -4,6 +4,7 @@ package net.javacoding.jspider.core.task.work;
 import net.javacoding.jspider.api.model.HTTPHeader;
 import net.javacoding.jspider.api.model.Site;
 import net.javacoding.jspider.core.SpiderContext;
+import net.javacoding.jspider.core.logging.Log;
 import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.event.CoreEvent;
 import net.javacoding.jspider.core.event.impl.*;
@@ -19,9 +20,11 @@ import java.net.*;
  *
  * $Id: SpiderHttpURLTask.java,v 1.19 2003/04/10 16:19:14 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  */
 public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
+
+    private static final Log log = LogFactory.getLog( SpiderHttpURLTask.class );
 
     protected URL url;
     protected Site site;
@@ -87,7 +90,7 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
                         i = is.read();
                     }
             } catch (IOException e) {
-                LogFactory.getLog(SpiderHttpURLTask.class).error("i/o exception during fetch",e);
+                log.error( "i/o exception during fetch", e );
             }
 
             String contentType = connection.getContentType();
@@ -107,7 +110,11 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
             headers = HTTPHeaderUtil.getHeaders(connection);
             event = new URLSpideredErrorEvent(context, url, 404, connection, headers, e);
         } catch (Exception e) {
-            LogFactory.getLog(this.getClass()).error("exception during spidering", e);
+            if ( httpStatus ==  HttpURLConnection.HTTP_FORBIDDEN ) {
+                log.error( "HTTP Status-Code 403: Forbidden - " + url );
+            } else {
+                LogFactory.getLog(this.getClass()).error("exception during spidering", e);
+            }
             event = new URLSpideredErrorEvent(context, url, httpStatus, connection, headers, e);
         } finally {
             notifyEvent(url, event);
@@ -115,7 +122,7 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    LogFactory.getLog(SpiderHttpURLTask.class).error("i/o exception closing inputstream",e);
+                    log.error( "i/o exception closing inputstream", e );
                 }
             }
         }
