@@ -30,13 +30,14 @@ class CookieDAOImpl implements CookieDAOSPI {
 
     public Cookie[] find(int id) {
         ArrayList al = new ArrayList ( );
-        Statement st = null;
+        String sql = "select * from jspider_cookie where site=?";
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_cookie where site='" + id + "'" );
+            ps.setInt( 1, id );
+            rs = ps.executeQuery();
             while ( rs.next() ) {
                 al.add(createCookieFromRecord(rs));
             }
@@ -44,7 +45,6 @@ class CookieDAOImpl implements CookieDAOSPI {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
         return (Cookie[]) al.toArray(new Cookie[al.size()]);
     }

@@ -92,25 +92,25 @@ class DecisionDAOImpl implements DecisionDAOSPI {
         ResultSet rs2 = null;
         try (
                 Connection connection = dbUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement("select * from jspider_decision where resource=? and subject=?");
-                PreparedStatement ps2 = connection.prepareStatement("select * from jspider_decision_step where resource=? and subject=? order by sequence");
+                PreparedStatement ps = connection.prepareStatement("select type, comment from jspider_decision where resource=? and subject=?");
+                PreparedStatement ps2 = connection.prepareStatement("select rule, type, decision, comment from jspider_decision_step where resource=? and subject=? order by sequence");
         ) {
             ps.setInt(1, resource.getId());
             ps.setInt(2, subject);
             rs = ps.executeQuery();
             if ( rs.next() ) {
-                int type = rs.getInt(ATTRIBUTE_TYPE);
-                String comment = rs.getString(ATTRIBUTE_COMMENT);
+                int type = rs.getInt(1);
+                String comment = rs.getString(2);
                 decision = new DecisionInternal ( type, comment );
 
                 ps2.setInt(1, resource.getId());
                 ps2.setInt(2, subject);
                 rs2 = ps2.executeQuery();
                 while ( rs2.next ( ) ) {
-                    String rule = rs2.getString(ATTRIBUTE_RULE);
-                    int stepType = rs2.getInt(ATTRIBUTE_TYPE);
-                    int stepDecision = rs2.getInt(ATTRIBUTE_DECISION);
-                    String stepComment = rs2.getString(ATTRIBUTE_COMMENT);
+                    String rule = rs2.getString(1);
+                    int stepType = rs2.getInt(2);
+                    int stepDecision = rs2.getInt(3);
+                    String stepComment = rs2.getString(4);
                     decision.addStep(rule,stepType, stepDecision, stepComment);
                 }
             }
