@@ -46,7 +46,8 @@ class DBUtil {
 
     public Connection getConnection() {
         try {
-            return comboPooledDataSource.getConnection();
+            Connection connection = comboPooledDataSource.getConnection();
+            return connection;
         } catch ( SQLException e ) {
             throw new RuntimeException( "Failed to getConnection", e );
         }
@@ -67,8 +68,10 @@ class DBUtil {
             comboPooledDataSource.setJdbcUrl( jdbcUrl );
             comboPooledDataSource.setUser( user );
             comboPooledDataSource.setPassword( password );
-            comboPooledDataSource.setMaxStatements( 180 );
+            comboPooledDataSource.setMaxStatements( 35000 );
+            comboPooledDataSource.setMinPoolSize( 10 );
             comboPooledDataSource.setMaxPoolSize( 300 );
+            comboPooledDataSource.setTestConnectionOnCheckout( true );
             log.info( String.format( "Connection pool created for %s user=%s", jdbcUrl, user ) );
         } catch ( PropertyVetoException e ) {
             throw new RuntimeException( "Failed to setup the c3p0 connection pool!", e );
