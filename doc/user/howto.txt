@@ -8,7 +8,11 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
    mvn clean install
 
 2. Deploy
-   Update the jspider.properties  to indicate the storage provider and database information.
+   There are 3 configurations that use database output.  You will need to update the jspider.properties to set the
+   database information.
+      ~/jspider/conf/dboutput/jspider.properties - production environment
+      ~/jspider/conf/dbalpha/jspider.properties - created for alpha environment
+      ~/jspider/conf/dbstg/jspider.properties - created for stg environment
 
    The script deploy.sh is provided in the project home directory to copy the jspider runtime environment to a target
    server.
