@@ -20,15 +20,15 @@ public class URLFinder {
     };
 
     public static void findURLs(URLFinderCallback callback, String line) {
-        findBase(callback, line, basePattern);
+        String lineLowerCase = line.toLowerCase();
+        findBase(callback, line, lineLowerCase, basePattern);
         for (int i = 0; i < patterns.length; i++) {
             String pattern = patterns[i];
-            findURLs(callback, line, pattern);
+            findURLs(callback, line, lineLowerCase, pattern);
         }
     }
 
-    protected static void findBase(URLFinderCallback callback, String line, String pattern) {
-        String lineLowerCase = line.toLowerCase();
+    private static void findBase(URLFinderCallback callback, String line, String lineLowerCase, String pattern) {
         int pos = lineLowerCase.indexOf(pattern);
         if ( pos != -1 ) {
             String url = "";
@@ -42,8 +42,7 @@ public class URLFinder {
         }
     }
 
-    protected static void findURLs(URLFinderCallback callback, String line, String pattern) {
-        String lineLowerCase = line.toLowerCase();
+    private static void findURLs(URLFinderCallback callback, String line, String lineLowerCase, String pattern) {
         int pos = lineLowerCase.indexOf(pattern);
         while (pos != -1) {
             String uri = "";
@@ -75,8 +74,10 @@ public class URLFinder {
             string = string.substring(pos + 1);
             tokens = " \'>";
         } else if ( c == '"') {
-            string = string.substring(pos + 1);
+            string = string.substring( pos + 1 );
             tokens = " \">";
+        } else if ( c == '\\' ) {
+            string = string.substring( pos + 1 );
         } else {
             string = string.substring(pos);
         }
