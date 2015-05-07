@@ -47,7 +47,7 @@ public class SpiderContextImpl implements SpiderContext {
     protected URL baseURL;
     protected EventDispatcher eventDispatcher;
     protected ThrottleFactory throttleFactory;
-    protected Map throttles;
+    protected Map<String, Throttle> throttles;
     protected Map spiderRules;
     protected Map parserRules;
     protected Map robotsTXTRules;
@@ -68,16 +68,20 @@ public class SpiderContextImpl implements SpiderContext {
         this.throttleFactory = throttleFactory;
         this.storage = storage;
         this.cookieUtil = new CookieUtil();
-        this.throttles = new HashMap();
+        this.throttles = new HashMap<>();
         this.spiderRules = new HashMap ( );
         this.parserRules = new HashMap ( );
         this.robotsTXTRules = new HashMap ( );
         this.generalSpiderRules = RuleFactory.createGeneralSpiderRules();
         this.generalParserRules = RuleFactory.createGeneralParserRules();
-        lockTable = new LockTable( 100 );
         this.log = LogFactory.getLog(SpiderContext.class);
 
         PropertySet props = ConfigurationFactory.getConfiguration().getJSpiderConfiguration();
+
+        PropertySet threadingProps = new MappedPropertySet( ConfigConstants.CONFIG_THREADING, props );
+        int lockCount = threadingProps.getInteger( ConfigConstants.CONFIG_THREADING_LOCKS, 100 );
+        lockTable = new LockTable( lockCount );
+        log.info( "create LockTable with " + lockCount + " locks." );
 
         this.defaultUserAgent = props.getString(ConfigConstants.CONFIG_USERAGENT, Constants.USERAGENT );
         log.info("default user Agent is '" + defaultUserAgent + "'");
@@ -153,7 +157,7 @@ public class SpiderContextImpl implements SpiderContext {
     public void throttle(Site site) {
         Throttle throttle = null;
 
-        throttle = (Throttle) throttles.get(site.getHost());
+        throttle = throttles.get(site.getHost());
         if (throttle == null) {
             throttle = throttleFactory.createThrottle(site);
             throttles.put(site.getHost(), throttle);
