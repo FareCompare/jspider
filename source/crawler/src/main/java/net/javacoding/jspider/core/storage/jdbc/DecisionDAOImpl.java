@@ -1,14 +1,18 @@
 package net.javacoding.jspider.core.storage.jdbc;
 
+import net.javacoding.jspider.api.model.DecisionStep;
+import net.javacoding.jspider.core.logging.Log;
+import net.javacoding.jspider.core.logging.LogFactory;
+import net.javacoding.jspider.core.model.DecisionInternal;
+import net.javacoding.jspider.core.model.ResourceInternal;
 import net.javacoding.jspider.core.storage.DecisionDAO;
 import net.javacoding.jspider.core.storage.spi.DecisionDAOSPI;
 import net.javacoding.jspider.core.storage.spi.StorageSPI;
-import net.javacoding.jspider.core.logging.LogFactory;
-import net.javacoding.jspider.core.logging.Log;
-import net.javacoding.jspider.core.model.*;
-import net.javacoding.jspider.api.model.*;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * $Id: DecisionDAOImpl.java,v 1.3 2003/04/11 16:37:06 vanrogu Exp $
@@ -45,9 +49,13 @@ class DecisionDAOImpl implements DecisionDAOSPI {
     }
 
     protected void saveDecision ( int subject, ResourceInternal resource, DecisionInternal decision ) {
+        if ( resource == null ) {
+            log.error( "saveDecision: resource is null, subject=" + subject + ", " + decision );
+            return;
+        }
         try (
                 Connection connection = dbUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement("insert into jspider_decision ( resource, subject, type, comment ) values (?,?,?,?)");
+                PreparedStatement ps = connection.prepareStatement("insert ignore into jspider_decision ( resource, subject, type, comment ) values (?,?,?,?)");
         ) {
             ps.setInt(1, resource.getId());
             ps.setInt(2, (subject));
@@ -57,7 +65,7 @@ class DecisionDAOImpl implements DecisionDAOSPI {
 
             DecisionStep[] steps = decision.getSteps();
             try (
-                    PreparedStatement ps2 = connection.prepareStatement("insert into jspider_decision_step ( resource, subject, sequence, type, rule, decision, comment ) values (?,?,?,?,?,?,?)");
+                    PreparedStatement ps2 = connection.prepareStatement("insert ignore into jspider_decision_step ( resource, subject, sequence, type, rule, decision, comment ) values (?,?,?,?,?,?,?)");
             ){
                 for (int i = 0; i < steps.length; i++) {
                     DecisionStep step = steps[i];
@@ -73,8 +81,8 @@ class DecisionDAOImpl implements DecisionDAOSPI {
             } catch ( SQLException e ) {
                 throw e;
             }
-        } catch (SQLException e) {
-            log.error("SQLException", e);
+        } catch ( SQLException e) {
+            log.error("saveDecision failed: " + resource.getURL() + " - " + decision, e);
         }
     }
 
@@ -122,5 +130,4 @@ class DecisionDAOImpl implements DecisionDAOSPI {
         }
         return decision;
     }
-
 }
