@@ -1,35 +1,45 @@
 package net.javacoding.jspider.core.task.impl;
 
-import net.javacoding.jspider.core.exception.*;
-import net.javacoding.jspider.core.task.*;
+import net.javacoding.jspider.core.exception.NoSuitableItemFoundException;
+import net.javacoding.jspider.core.exception.SpideringDoneException;
+import net.javacoding.jspider.core.exception.TaskAssignmentException;
+import net.javacoding.jspider.core.task.Scheduler;
+import net.javacoding.jspider.core.task.WorkerTask;
 import net.javacoding.jspider.core.task.work.DecideOnSpideringTask;
 
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Default implementation of a Task scheduler
  *
  * $Id: SchedulerImpl.java,v 1.17 2003/04/25 21:29:04 vanrogu Exp $
  *
- * @author  Günther Van Roey
+ * @author  Gï¿½nther Van Roey
  */
 public class SchedulerImpl implements Scheduler {
 
     /** List of fetch tasks to be carried out. */
-    protected List fetchTasks;
+    protected BlockingQueue<WorkerTask> fetchTasks;
 
     /** List of thinker tasks to be carried out. */
-    protected List thinkerTasks;
+    protected BlockingQueue<WorkerTask> thinkerTasks;
 
     /** Set of tasks that have been assigned. */
-    protected Set assignedSpiderTasks;
-    protected Set assignedThinkerTasks;
+    protected final Set<WorkerTask> assignedSpiderTasks;
+    protected final Set<WorkerTask> assignedThinkerTasks;
 
-    protected int spiderTasksDone;
-    protected int thinkerTasksDone;
+    protected volatile int spiderTasksDone;
+    protected volatile int thinkerTasksDone;
 
-    protected Map blocked;
+    protected Map<URL,ArrayList<DecideOnSpideringTask>> blocked;
 
     int blockedCount = 0;
 
@@ -65,22 +75,30 @@ public class SchedulerImpl implements Scheduler {
         return thinkerTasksDone;
     }
 
+    public int getSpiderQueueSize() {
+        return fetchTasks.size();
+    }
+
+    public int getThinkerQueueSize() {
+        return thinkerTasks.size();
+    }
+
 
     /**
      * Public constructor?
      */
     public SchedulerImpl() {
-        fetchTasks = new ArrayList();
-        thinkerTasks = new ArrayList();
-        assignedThinkerTasks = new HashSet();
-        assignedSpiderTasks = new HashSet();
-        blocked = new HashMap();
+        fetchTasks = new LinkedBlockingQueue<>( );
+        thinkerTasks = new LinkedBlockingQueue<>();
+        assignedThinkerTasks = new HashSet<>();
+        assignedSpiderTasks = new HashSet<>();
+        blocked = new ConcurrentHashMap<>();
     }
 
     public void block(URL siteURL, DecideOnSpideringTask task) {
-        ArrayList al = (ArrayList)blocked.get(siteURL);
+        ArrayList<DecideOnSpideringTask> al = blocked.get(siteURL);
         if ( al == null ) {
-            al = new ArrayList();
+            al = new ArrayList<>();
             blocked.put(siteURL, al);
         }
         int before = al.size();
@@ -92,12 +110,12 @@ public class SchedulerImpl implements Scheduler {
     }
 
     public DecideOnSpideringTask[] unblock(URL siteURL) {
-        ArrayList al = (ArrayList)blocked.remove(siteURL);
+        ArrayList<DecideOnSpideringTask> al = blocked.remove(siteURL);
         if ( al == null ) {
             return new DecideOnSpideringTask[0];
         } else {
           blockedCount-=al.size();
-          return (DecideOnSpideringTask[]) al.toArray(new DecideOnSpideringTask[al.size()]);
+          return al.toArray(new DecideOnSpideringTask[al.size()]);
         }
     }
 
@@ -105,7 +123,7 @@ public class SchedulerImpl implements Scheduler {
      * Schedules a task to be processed.
      * @param task task to be scheduled
      */
-    public synchronized void schedule(WorkerTask task) {
+    public void schedule(WorkerTask task) {
         if (task.getType() == WorkerTask.WORKERTASK_SPIDERTASK ) {
             fetchTasks.add(task);
         } else {
@@ -117,21 +135,33 @@ public class SchedulerImpl implements Scheduler {
      * Flags a task as done.
      * @param task task that was complete
      */
-    public synchronized void flagDone(WorkerTask task) {
+    public void flagDone(WorkerTask task) {
         if (task.getType() == WorkerTask.WORKERTASK_THINKERTASK ) {
-            assignedThinkerTasks.remove(task);
-            thinkerTasksDone++;
+            synchronized (assignedThinkerTasks) {
+                assignedThinkerTasks.remove(task);
+                thinkerTasksDone++;
+            }
         }else{
-            assignedSpiderTasks.remove(task);
-            spiderTasksDone++;
+            synchronized (assignedSpiderTasks) {
+                assignedSpiderTasks.remove(task);
+                spiderTasksDone++;
+            }
         }
     }
 
-    public synchronized WorkerTask getThinkerTask() throws TaskAssignmentException {
+    public WorkerTask getThinkerTask() throws TaskAssignmentException {
         if (thinkerTasks.size() > 0) {
-            WorkerTask task = (WorkerTask) thinkerTasks.remove(0);
-            assignedThinkerTasks.add(task);
-            return task;
+            try {
+                WorkerTask task = thinkerTasks.poll( 1, TimeUnit.SECONDS );
+                if ( task != null ) {
+                    synchronized (assignedThinkerTasks) {
+                        assignedThinkerTasks.add(task);
+                    }
+                    return task;
+                }
+            } catch ( InterruptedException e ) {
+                throw new NoSuitableItemFoundException();
+            }
         }
         if (allTasksDone()) {
             throw new SpideringDoneException();
@@ -146,11 +176,19 @@ public class SchedulerImpl implements Scheduler {
      * @throws TaskAssignmentException notifies when the work is done or there
      * are no current outstanding tasks.
      */
-    public synchronized WorkerTask getFethTask() throws TaskAssignmentException {
+    public synchronized WorkerTask getFetchTask() throws TaskAssignmentException {
         if (fetchTasks.size() > 0) {
-            WorkerTask task = (WorkerTask) fetchTasks.remove(0);
-            assignedSpiderTasks.add(task);
-            return task;
+            try {
+                WorkerTask task = fetchTasks.poll( 1, TimeUnit.SECONDS );
+                if ( task != null ) {
+                    synchronized (assignedSpiderTasks) {
+                        assignedSpiderTasks.add(task);
+                    }
+                    return task;
+                }
+            } catch ( InterruptedException e ) {
+                throw new NoSuitableItemFoundException();
+            }
         }
         if (allTasksDone()) {
             throw new SpideringDoneException();

@@ -5,6 +5,7 @@ package net.javacoding.jspider.core.impl;
 
 
 import net.javacoding.jspider.Constants;
+import net.javacoding.jspider.core.threading.LockTable;
 import net.javacoding.jspider.spi.Rule;
 import net.javacoding.jspider.api.event.site.UserAgentObeyedEvent;
 import net.javacoding.jspider.api.model.Cookie;
@@ -31,13 +32,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 
 
 /**
  *
  * $Id: SpiderContextImpl.java,v 1.32 2003/04/10 16:19:05 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  */
 public class SpiderContextImpl implements SpiderContext {
 
@@ -57,6 +59,7 @@ public class SpiderContextImpl implements SpiderContext {
     protected Ruleset generalSpiderRules;
     protected Ruleset generalParserRules;
     protected String defaultUserAgent;
+    private LockTable lockTable;
     protected Log log;
 
     public SpiderContextImpl(URL baseURL, EventDispatcher eventDispatcher, ThrottleFactory throttleFactory, Storage storage) {
@@ -71,6 +74,7 @@ public class SpiderContextImpl implements SpiderContext {
         this.robotsTXTRules = new HashMap ( );
         this.generalSpiderRules = RuleFactory.createGeneralSpiderRules();
         this.generalParserRules = RuleFactory.createGeneralParserRules();
+        lockTable = new LockTable( 100 );
         this.log = LogFactory.getLog(SpiderContext.class);
 
         PropertySet props = ConfigurationFactory.getConfiguration().getJSpiderConfiguration();
@@ -125,13 +129,13 @@ public class SpiderContextImpl implements SpiderContext {
         String cookieString = site.getCookieString();
         boolean useCookies = site.getUseCookies();
         if (useCookies && cookieString != null) {
-            connection.setRequestProperty("Cookie", cookieString);
+            connection.setRequestProperty( "Cookie", cookieString );
         }
     }
 
     public void postHandle(URLConnection connection, Site site) {
-        setCookies(site, cookieUtil.getCookies(connection));
-        storage.getSiteDAO().save(site);
+        setCookies( site, cookieUtil.getCookies( connection ) );
+        storage.getSiteDAO().save( site );
     }
 
     public Agent getAgent() {
@@ -253,7 +257,7 @@ public class SpiderContextImpl implements SpiderContext {
             log.info("site " + sitei.getURL() + " must not be handled.");
         }
 
-        spiderRules.put(site, RuleFactory.createSiteSpiderRules(site));
+        spiderRules.put( site, RuleFactory.createSiteSpiderRules( site ) );
         parserRules.put(site, RuleFactory.createSiteParserRules(site));
     }
 
@@ -263,5 +267,9 @@ public class SpiderContextImpl implements SpiderContext {
 
     public String getUserAgent() {
         return defaultUserAgent;
+    }
+
+    public Lock getLock( URL url ) {
+        return lockTable.getLock( url );
     }
 }
