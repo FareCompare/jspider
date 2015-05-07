@@ -1,15 +1,20 @@
 package net.javacoding.jspider.core.storage.jdbc;
 
+import net.javacoding.jspider.core.logging.Log;
+import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.model.SiteInternal;
 import net.javacoding.jspider.core.storage.spi.SiteDAOSPI;
 import net.javacoding.jspider.core.storage.spi.StorageSPI;
-import net.javacoding.jspider.core.logging.LogFactory;
-import net.javacoding.jspider.core.logging.Log;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * $Id: SiteDAOImpl.java,v 1.8 2003/04/11 16:37:06 vanrogu Exp $
@@ -32,6 +37,11 @@ class SiteDAOImpl implements SiteDAOSPI {
     protected StorageSPI storage;
     protected Log log;
 
+    /** Site cache. */
+    protected Map<URL, SiteInternal> knownURLs = new ConcurrentHashMap<>(  );
+    protected Map<Integer, SiteInternal> byId = new ConcurrentHashMap<>(  );
+
+
     public SiteDAOImpl(StorageSPI storage, DBUtil dbUtil) {
         this.storage = storage;
         this.dbUtil = dbUtil;
@@ -39,7 +49,11 @@ class SiteDAOImpl implements SiteDAOSPI {
     }
 
     public SiteInternal find(URL siteURL) {
-        SiteInternal site = null;
+        SiteInternal site = knownURLs.get( siteURL );
+        if ( site != null ) {
+            return site;
+        }
+
         Statement st = null;
         ResultSet rs = null;
         try (
@@ -49,6 +63,7 @@ class SiteDAOImpl implements SiteDAOSPI {
             rs = st.executeQuery("select * from jspider_site where host = '" + siteURL.getHost() + "' and port = " + siteURL.getPort());
             if (rs.next()) {
                 site = createSiteFromRecord(rs);
+                knownURLs.put( siteURL, site );
             } else {
                 return null;
             }
@@ -62,7 +77,10 @@ class SiteDAOImpl implements SiteDAOSPI {
     }
 
     public SiteInternal find(int id) {
-        SiteInternal site = null;
+        SiteInternal site = byId.get( id );
+        if ( site != null ) {
+            return site;
+        }
         Statement st = null;
         ResultSet rs = null;
         try (
@@ -72,6 +90,7 @@ class SiteDAOImpl implements SiteDAOSPI {
             rs = st.executeQuery("select * from jspider_site id=" + id);
             if (rs.next()) {
                 site = createSiteFromRecord(rs);
+                byId.put( id, site );
             } else {
                 return null;
             }
@@ -132,6 +151,8 @@ class SiteDAOImpl implements SiteDAOSPI {
         } finally {
             dbUtil.safeClose(st, log);
         }
+
+        byId.put( id, site );
     }
 
     public void save(int id, SiteInternal site) {
@@ -166,6 +187,7 @@ class SiteDAOImpl implements SiteDAOSPI {
         } finally {
             dbUtil.safeClose(st, log);
         }
+        byId.put( id, site );
     }
 
     public SiteInternal[] findAll() {
