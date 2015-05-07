@@ -16,7 +16,7 @@ import java.sql.*;
  * @todo DAO's need caching - definitely !
  * @todo find a good way of cleaning the store at spidering start or layering it per spider session
  */
-class JdbcStorageImpl implements StorageSPI {
+public class JdbcStorageImpl implements StorageSPI {
 
     protected SiteDAOSPI siteDAO;
     protected ResourceDAOSPI resourceDAO;
@@ -25,16 +25,17 @@ class JdbcStorageImpl implements StorageSPI {
     protected CookieDAOSPI cookieDAO;
     protected EMailAddressDAOSPI emailAddressDAO;
     protected FolderDAOSPI folderDAO;
+    private final DBUtil dbUtil;
 
     public JdbcStorageImpl(PropertySet props) {
-        DBUtil dbUtil = new DBUtil(props);
-        siteDAO = new SiteDAOImpl(this,dbUtil);
-        resourceDAO = new ResourceDAOImpl(this,dbUtil);
-        contentDAO = new ContentDAOImpl(this,dbUtil);
-        decisionDAO = new DecisionDAOImpl(this,dbUtil);
-        cookieDAO = new CookieDAOImpl(this,dbUtil);
-        emailAddressDAO = new EMailAddressDAOImpl(this,dbUtil);
-        folderDAO = new FolderDAOImpl(this, dbUtil);
+        dbUtil = new DBUtil(props);
+        siteDAO = new SiteDAOImpl(this, dbUtil );
+        resourceDAO = new ResourceDAOImpl(this, dbUtil );
+        contentDAO = new ContentDAOImpl(this, dbUtil );
+        decisionDAO = new DecisionDAOImpl(this, dbUtil );
+        cookieDAO = new CookieDAOImpl(this, dbUtil );
+        emailAddressDAO = new EMailAddressDAOImpl(this, dbUtil );
+        folderDAO = new FolderDAOImpl(this, dbUtil );
         clearDatabase ( dbUtil );
     }
 
@@ -57,6 +58,10 @@ class JdbcStorageImpl implements StorageSPI {
             LogFactory.getLog(JdbcStorageImpl.class).error("SQLException during emtpy of database", e);
         }
 
+    }
+
+    public DBUtil getDbUtil() {
+        return dbUtil;
     }
 
     public FolderDAOSPI getFolderDAO() {

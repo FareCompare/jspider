@@ -29,6 +29,10 @@ public class StorageImpl implements Storage {
         this.emailAddressDAO = new EMailAddressDAOImpl(LogFactory.getLog(EMailAddressDAO.class),storage, storage.getEMailAddressDAO());
     }
 
+    public StorageSPI getStorageSPI() {
+        return storage;
+    }
+
     public SiteDAO getSiteDAO() {
         return siteDAO;
     }

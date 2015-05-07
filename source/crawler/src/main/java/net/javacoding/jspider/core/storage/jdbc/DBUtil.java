@@ -13,7 +13,7 @@ import java.util.Properties;
 /**
  * $Id: DBUtil.java,v 1.7 2003/04/11 16:37:05 vanrogu Exp $
  */
-class DBUtil {
+public class DBUtil {
 
     public static final String DRIVER = "driver";
     public static final String USER = "user";
