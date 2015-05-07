@@ -1,28 +1,43 @@
 package net.javacoding.jspider.api.event.monitor;
 
+import java.util.Map;
+
 /**
  * $Id: ThreadPoolMonitorEvent.java,v 1.3 2003/03/28 17:26:26 vanrogu Exp $
  */
 public class ThreadPoolMonitorEvent extends MonitorEvent {
 
     protected String name;
+    protected int occupied;
     protected int occupationPct;
+    protected int idle;
     protected int idlePct;
+    protected int blocked;
     protected int blockedPct;
+    protected int busy;
     protected int busyPct;
     protected int size;
 
-    public ThreadPoolMonitorEvent ( String name, int occupationPct, int idlePct, int blockedPct, int busyPct, int size ) {
+    public ThreadPoolMonitorEvent( String name, Map<String,Integer> counts ) {
         this.name = name;
-        this.occupationPct = occupationPct;
-        this.idlePct = idlePct;
-        this.blockedPct = blockedPct;
-        this.busyPct = busyPct;
-        this.size = size;
+        size = counts.get( "size" );
+
+        occupied = counts.get("occupied");
+        occupationPct = (occupied * 100) / size;
+
+        idle = counts.get("idle");
+        idlePct = (idle * 100) / size;
+
+        blocked = counts.get("blocked");
+        blockedPct = (blocked * 100) / size;
+
+        busy = counts.get("busy");
+        busyPct = (busy * 100) / size;
     }
 
     public String toString() {
-        return "ThreadPool " + getName() + " occupation:" + (getOccupationPct()) + "% [idle: " + getIdlePct() + "%, blocked: " + getBlockedPct() + "%, busy: " + getBusyPct() + "%], size: " + getSize();
+        return String.format("ThreadPool %s occupied: %s (%s%%) [idle: %s (%s%%), blocked: %s (%s%%), busy: %s (%s%%)], size: %s",
+                      name, occupied, occupationPct, idle, idlePct, blocked, blockedPct, busy, busyPct, size );
     }
 
     public String getComment() {

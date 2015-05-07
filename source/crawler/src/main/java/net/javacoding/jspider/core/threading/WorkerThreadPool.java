@@ -4,6 +4,12 @@ package net.javacoding.jspider.core.threading;
 import net.javacoding.jspider.core.task.DispatcherTask;
 import net.javacoding.jspider.core.task.WorkerTask;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 
 /**
  * Thread Pool implementation that will be used for pooling the spider and
@@ -24,6 +30,8 @@ public class WorkerThreadPool extends ThreadGroup {
     /** Size of the pool. */
     protected int poolSize;
 
+    private ThreadPoolExecutor executor;
+
     /**
      * Public constructor
      * @param poolName name of the threadPool
@@ -34,6 +42,13 @@ public class WorkerThreadPool extends ThreadGroup {
         super(poolName);
 
         this.poolSize = poolSize;
+//        executor = new ThreadPoolExecutor( poolSize,
+//                                              poolSize,
+//                                              60,
+//                                              TimeUnit.SECONDS,
+//                                              new SynchronousQueue<Runnable>(),
+//                                              new NamedThreadFactory( poolName, threadName ) );
+
 
         dispatcherThread = new DispatcherThread(this, threadName + " dispatcher", this);
         pool = new WorkerThread[poolSize];
@@ -80,12 +95,11 @@ public class WorkerThreadPool extends ThreadGroup {
         dispatcherThread.assign(task);
     }
 
-    /**
-     * Returns the percentage of worker threads that are busy.
-     * @return int value representing the percentage of busy workers
-     */
-    public int getOccupation() {
+    public Map<String, Integer> getCounts() {
         int occupied = 0;
+        int blocked = 0;
+        int busy = 0;
+        int idle = 0;
         for (int i = 0; i < poolSize; i++) {
             WorkerThread thread = pool[i];
             if (thread.isOccupied()) {
@@ -95,41 +109,30 @@ public class WorkerThreadPool extends ThreadGroup {
                     thread.notify();
                 }
             }
-        }
-        return (occupied * 100) / poolSize;
-    }
-
-    public int getBlockedPercentage() {
-        int counter = 0;
-        for (int i = 0; i < poolSize; i++) {
-            WorkerThread thread = pool[i];
-            if (thread.getState() == Thread.State.BLOCKED ) {
-                counter++;
+            switch ( thread.getState() ) {
+                case NEW:
+                    break;
+                case RUNNABLE:
+                    busy++;
+                    break;
+                case BLOCKED:
+                    blocked++;
+                    break;
+                case WAITING:
+                case TIMED_WAITING:
+                    idle++;
+                    break;
+                case TERMINATED:
+                    break;
             }
         }
-        return (counter * 100) / poolSize;
-    }
-
-    public int getBusyPercentage () {
-        int counter = 0;
-        for (int i = 0; i < poolSize; i++) {
-            WorkerThread thread = pool[i];
-            if (thread.getState() == Thread.State.WAITING) {
-                counter++;
-            }
-        }
-        return (counter * 100) / poolSize;
-    }
-
-    public int getIdlePercentage ( ) {
-        int counter = 0;
-        for (int i = 0; i < poolSize; i++) {
-            WorkerThread thread = pool[i];
-            if (thread.getState() == Thread.State.RUNNABLE ) {
-                counter++;
-            }
-        }
-        return (counter * 100) / poolSize;
+        Map<String, Integer> counts = new HashMap<>(  );
+        counts.put( "occupied", occupied );
+        counts.put( "blocked", blocked );
+        counts.put( "busy", busy );
+        counts.put( "idle", idle );
+        counts.put( "size", poolSize );
+        return counts;
     }
 
     /**

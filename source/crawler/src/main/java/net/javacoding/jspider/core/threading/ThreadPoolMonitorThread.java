@@ -18,6 +18,6 @@ public class ThreadPoolMonitorThread extends MonitorThread {
     }
 
     public MonitorEvent doMonitorTask() {
-        return new ThreadPoolMonitorEvent ( pool.getName(), pool.getOccupation(), pool.getIdlePercentage(), pool.getBlockedPercentage(),  pool.getBusyPercentage(), pool.getSize() );
+        return new ThreadPoolMonitorEvent ( pool.getName(), pool.getCounts() );
     }
 }
