@@ -21,7 +21,7 @@ public class DistributedLoadThrottleProvider implements ThrottleProvider {
 
     public static final String INTERVAL = "interval";
     public static final int INTERVAL_DEFAULT = 1000;
-    public static final int INTERVAL_MIN = 50;
+    public static final int INTERVAL_MIN = 10;
 
     /**
      * Method that instantiates the Throttle implementation.
