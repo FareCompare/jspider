@@ -34,6 +34,7 @@ import net.javacoding.jspider.core.storage.spi.StorageSPI;
 import net.javacoding.jspider.core.util.ReportTable;
 import net.javacoding.jspider.core.util.config.ConfigurationFactory;
 import net.javacoding.jspider.core.util.config.JSpiderConfiguration;
+import net.javacoding.jspider.core.util.config.PropertySet;
 import net.javacoding.jspider.core.util.statistics.StopWatch;
 import net.javacoding.jspider.spi.Plugin;
 
@@ -54,8 +55,21 @@ public class DbReporter implements Plugin, EventVisitor {
 
     private Log log = LogFactory.getLog( this.getClass() );
     private URL baseURL;
+    private String jspiderRun;
 
     public DbReporter() {
+        log.info( "DbReporter<init>" );
+        initJspiderRun();
+    }
+
+    public DbReporter (PropertySet config ) {
+        log.info( "DbReporter<init>" );
+        initJspiderRun();
+    }
+
+    private void initJspiderRun() {
+        jspiderRun = System.getProperty( "jspider.run", "" );
+        log.info( "jspiderRun=" + jspiderRun );
     }
 
     //
@@ -129,12 +143,19 @@ public class DbReporter implements Plugin, EventVisitor {
     private void reportNon200Urls( DBUtil dbUtil ) {
         reportNon200UrlsAll( dbUtil );
         reportNon200UrlsFlights( dbUtil );
+        reportNotCrawled( dbUtil );
+    }
+
+    private void reportNotCrawled( DBUtil dbUtil ) {
+        log.warn( "reportNotCrawled not implemented!!" );
+        //todo implement
     }
 
     private void reportNon200UrlsFlights( DBUtil dbUtil ) {
         StopWatch timer = new StopWatch( true );
         JSpiderConfiguration jspiderConfig = ConfigurationFactory.getConfiguration();
-        File output = new File( jspiderConfig.getDefaultOutputFolder().getAbsoluteFile(), "non_200_report_flights.csv" );
+        String fileName = "jspider-" + jspiderRun + "-non_200_report_flights.csv";
+        File output = new File( jspiderConfig.getDefaultOutputFolder().getAbsoluteFile(), fileName );
         if ( output.delete() ) {
             log.info( "Deleted old report file: " + output );
         }
@@ -169,7 +190,7 @@ public class DbReporter implements Plugin, EventVisitor {
         } finally {
             dbUtil.safeClose( rs, log );
         }
-        log.info( "reportNon200UrlsFlights completed, duration " + timer );
+        log.info( "reportNon200UrlsFlights completed: " + output + ", duration " + timer );
 
     }
 
@@ -184,7 +205,8 @@ public class DbReporter implements Plugin, EventVisitor {
     private void reportNon200UrlsAll( DBUtil dbUtil ) {
         StopWatch timer = new StopWatch( true );
         JSpiderConfiguration jspiderConfig = ConfigurationFactory.getConfiguration();
-        File output = new File( jspiderConfig.getDefaultOutputFolder().getAbsoluteFile(), "non_200_report_all.csv" );
+        String fileName = "jspider-" + jspiderRun + "-non_200_report_all.csv";
+        File output = new File( jspiderConfig.getDefaultOutputFolder().getAbsoluteFile(), fileName );
         if ( output.delete() ) {
             log.info( "Deleted old report file: " + output );
         }
@@ -215,7 +237,7 @@ public class DbReporter implements Plugin, EventVisitor {
         } finally {
             dbUtil.safeClose( rs, log );
         }
-        log.info( "reportNon200UrlsAll completed, duration " + timer );
+        log.info( "reportNon200UrlsAll completed: " + output + ", duration " + timer );
     }
 
     private void reportCountsByHttpStatus( DBUtil dbUtil ) {
@@ -243,111 +265,111 @@ public class DbReporter implements Plugin, EventVisitor {
 
     @Override
     public void visit( EMailAddressDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( JSpiderEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( EngineRelatedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( FolderRelatedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( FolderDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceRelatedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( EMailAddressReferenceDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( MalformedURLFoundEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( MalformedBaseURLFoundEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceFetchedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceFetchErrorEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceForbiddenEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceParsedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceIgnoredForFetchingEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceIgnoredForParsingEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( ResourceReferenceDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( SiteRelatedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( SiteDiscoveredEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( RobotsTXTMissingEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( RobotsTXTFetchedEvent event ) {
-        //todo implement
+
     }
 
     @Override
     public void visit( UserAgentObeyedEvent event ) {
-        //todo implement
+
     }
 }
