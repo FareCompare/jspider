@@ -106,7 +106,7 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
                         i = is.read();
                     }
             } catch (IOException e) {
-                log.error( "i/o exception during fetch", e );
+                log.warn( "i/o exception during fetch", e );
             }
 
             String contentType = connection.getContentType();
@@ -127,9 +127,9 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
             event = new URLSpideredErrorEvent(context, url, 404, connection, headers, e);
         } catch (Exception e) {
             if ( httpStatus ==  HttpURLConnection.HTTP_FORBIDDEN ) {
-                log.error( "HTTP Status-Code 403: Forbidden - " + url );
+                log.warn( "HTTP Status-Code 403: Forbidden - " + url, e );
             } else {
-                LogFactory.getLog( this.getClass() ).error("exception during spidering", e);
+                log.warn("exception during spidering", e);
             }
             event = new URLSpideredErrorEvent(context, url, httpStatus, connection, headers, e);
         } finally {
@@ -138,7 +138,7 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    log.error( "i/o exception closing inputstream", e );
+                    log.warn( "i/o exception closing inputstream", e );
                 }
             }
         }
