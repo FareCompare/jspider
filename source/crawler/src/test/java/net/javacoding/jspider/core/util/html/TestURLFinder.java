@@ -29,9 +29,11 @@ public class TestURLFinder {
 //        inputStream = getClass().getClassLoader().getResourceAsStream( "NYC-BOS-market.html" );
 //        url = new URL( "http://www.farecompare.com/flights/New_York-NYC/Boston-BOS/market.html" );
 
-        inputStream = getClass().getClassLoader().getResourceAsStream( "LON-city.html" );
-        url = new URL( "http://www.farecompare.mx/vuelos/Londres-LON/city.html" );
-//                "<script type=\"text/javascript\"\nsrc=\"", (prefix || script_prefix) + name + (suffix || script_suffix) + '?' + config.query.cachebust,
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "LON-city.html" );
+//        url = new URL( "http://www.farecompare.mx/vuelos/Londres-LON/city.html" );
+
+        inputStream = getClass().getClassLoader().getResourceAsStream( "es-BOS.city.html" );
+        url = new URL( "http://alpha.farecompare.com/es/vuelos/Boston-BOS/city.html" );
     }
 
     @Test
