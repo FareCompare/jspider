@@ -30,7 +30,7 @@ class ContentDAOImpl implements ContentDAOSPI {
     protected Map<Integer, byte[]> contents;
 
     public ContentDAOImpl( StorageSPI storage, DBUtil dbUtil ) {
-        this.log = LogFactory.getLog( ContentDAOSPI.class );
+        this.log = LogFactory.getLog( this.getClass() );
         this.dbUtil = dbUtil;
         this.storage = storage;
         this.contents = new ConcurrentHashMap<>( );
@@ -57,7 +57,7 @@ class ContentDAOImpl implements ContentDAOSPI {
             }
         }
         catch ( Exception e ) {
-            log.error( "Failed to insert content into table. " + bytes.length + " bytes long", e );
+            log.error( "Failed to insert content id=" + id + " into table. " + bytes.length + " bytes long", e );
         }
     }
 
@@ -90,7 +90,7 @@ class ContentDAOImpl implements ContentDAOSPI {
             }
         }
         catch ( Exception e ) {
-            log.error( "Failed to read content from table", e );
+            log.error( "Failed to read content from table, id=" + id, e );
         }
         finally {
             dbUtil.safeClose( rs, log );
