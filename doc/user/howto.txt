@@ -46,6 +46,19 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
     -- counts by httpstatus
     SELECT httpstatus, COUNT(*) FROM jspider_resource GROUP BY 1 UNION SELECT 'TOTAL', COUNT(*) FROM jspider_resource;
 
+    -- show non 200 urls
+    SELECT 'id', 'url', 'httpstatus'
+    UNION (
+    SELECT r1.id, r1.url, r1.httpstatus
+      INTO OUTFILE '/usr/local/jspider/output/non_200_resouces.csv'
+           FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+           LINES TERMINATED BY '\n'
+      FROM jspider_resource r1
+     WHERE r1.httpstatus <> 0
+       AND r1.httpstatus <> 200
+     ORDER BY 1
+    );
+
     -- show non 200 urls and their referer
     SELECT 'id', 'url', 'httpstatus', 'id', 'referer'
     UNION (
