@@ -32,8 +32,11 @@ public class TestURLFinder {
 //        inputStream = getClass().getClassLoader().getResourceAsStream( "LON-city.html" );
 //        url = new URL( "http://www.farecompare.mx/vuelos/Londres-LON/city.html" );
 
-        inputStream = getClass().getClassLoader().getResourceAsStream( "es-BOS.city.html" );
-        url = new URL( "http://alpha.farecompare.com/es/vuelos/Boston-BOS/city.html" );
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "es-BOS.city.html" );
+//        url = new URL( "http://alpha.farecompare.com/es/vuelos/Boston-BOS/city.html" );
+
+        inputStream = getClass().getClassLoader().getResourceAsStream( "USMA-state.html" );
+        url = new URL( "http://alpha.farecompare.com/es/vuelos/Massachusetts-USMA/state.html" );
     }
 
     @Test

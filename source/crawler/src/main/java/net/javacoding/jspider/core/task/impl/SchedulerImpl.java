@@ -39,7 +39,7 @@ public class SchedulerImpl implements Scheduler {
     protected volatile int spiderTasksDone;
     protected volatile int thinkerTasksDone;
 
-    protected Map<URL,ArrayList<DecideOnSpideringTask>> blocked;
+    protected final ConcurrentHashMap<URL,ArrayList<DecideOnSpideringTask>> blocked;
 
     int blockedCount = 0;
 
@@ -99,23 +99,32 @@ public class SchedulerImpl implements Scheduler {
         ArrayList<DecideOnSpideringTask> al = blocked.get(siteURL);
         if ( al == null ) {
             al = new ArrayList<>();
-            blocked.put(siteURL, al);
+            ArrayList<DecideOnSpideringTask> previous = blocked.putIfAbsent( siteURL, al );
+            if ( previous != null ) {
+                al = previous;
+            }
         }
-        int before = al.size();
-        al.add(task);
-        int after = al.size();
+        int before;
+        int after;
+        synchronized ( al ) {
+            before = al.size();
+            al.add(task);
+            after = al.size();
+        }
 
         int diff = after-before;
         blockedCount+=diff;
     }
 
     public DecideOnSpideringTask[] unblock(URL siteURL) {
-        ArrayList<DecideOnSpideringTask> al = blocked.remove(siteURL);
+        ArrayList<DecideOnSpideringTask> al = blocked.remove( siteURL );
         if ( al == null ) {
             return new DecideOnSpideringTask[0];
         } else {
-          blockedCount-=al.size();
-          return al.toArray(new DecideOnSpideringTask[al.size()]);
+            synchronized (al) {
+                blockedCount-=al.size();
+                return al.toArray(new DecideOnSpideringTask[al.size()]);
+            }
         }
     }
 
