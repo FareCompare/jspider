@@ -57,7 +57,7 @@ public class WorkerThreadPool extends ThreadGroup {
             synchronized (this) {
                 try {
                     pool[i].start();
-                    wait();
+                    wait(1000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -79,7 +79,7 @@ public class WorkerThreadPool extends ThreadGroup {
                 }
             }
             try {
-                wait();
+                wait(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
