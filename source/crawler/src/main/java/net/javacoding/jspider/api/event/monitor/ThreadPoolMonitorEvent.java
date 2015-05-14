@@ -16,6 +16,8 @@ public class ThreadPoolMonitorEvent extends MonitorEvent {
     protected int blockedPct;
     protected int busy;
     protected int busyPct;
+    protected int terminated;
+    protected int terminatedPct;
     protected int size;
 
     public ThreadPoolMonitorEvent( String name, Map<String,Integer> counts ) {
@@ -33,11 +35,21 @@ public class ThreadPoolMonitorEvent extends MonitorEvent {
 
         busy = counts.get("busy");
         busyPct = (busy * 100) / size;
+
+        terminated = counts.get("terminated");
+        terminatedPct = (terminated * 100) / size;
     }
 
     public String toString() {
-        return String.format("ThreadPool %s occupied: %s (%s%%) [idle: %s (%s%%), blocked: %s (%s%%), busy: %s (%s%%)], size: %s",
-                      name, occupied, occupationPct, idle, idlePct, blocked, blockedPct, busy, busyPct, size );
+        return String.format(
+                "ThreadPool %s occupied: %s (%s%%) [idle: %s (%s%%), blocked: %s (%s%%), busy: %s (%s%%), terminated: %s (%s%%)], size: %s",
+                name,
+                occupied, occupationPct,
+                idle, idlePct,
+                blocked, blockedPct,
+                busy, busyPct,
+                terminated, terminatedPct,
+                size );
     }
 
     public String getComment() {

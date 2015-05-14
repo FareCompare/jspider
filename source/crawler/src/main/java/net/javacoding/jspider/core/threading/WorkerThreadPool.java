@@ -100,6 +100,7 @@ public class WorkerThreadPool extends ThreadGroup {
         int blocked = 0;
         int busy = 0;
         int idle = 0;
+        int terminated = 0;
         for (int i = 0; i < poolSize; i++) {
             WorkerThread thread = pool[i];
             if (thread.isOccupied()) {
@@ -123,6 +124,7 @@ public class WorkerThreadPool extends ThreadGroup {
                     idle++;
                     break;
                 case TERMINATED:
+                    terminated++;
                     break;
             }
         }
@@ -131,6 +133,7 @@ public class WorkerThreadPool extends ThreadGroup {
         counts.put( "blocked", blocked );
         counts.put( "busy", busy );
         counts.put( "idle", idle );
+        counts.put( "terminated", terminated );
         counts.put( "size", poolSize );
         return counts;
     }
