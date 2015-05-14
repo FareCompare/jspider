@@ -79,11 +79,24 @@ public class WorkerThreadPool extends ThreadGroup {
                 }
             }
             try {
+                if ( checkTerminated() ) {
+                    throw new ThreadPoolTerminatedException( "WorkerThreadPool "+ getName() + " all worker threads have terminated!");
+                }
                 wait(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
+    }
+
+    private boolean checkTerminated() {
+        for (int i = 0; i < poolSize; i++) {
+            WorkerThread thread = pool[i];
+            if ( thread.getState() != Thread.State.TERMINATED ) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
