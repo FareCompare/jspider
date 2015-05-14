@@ -1,5 +1,7 @@
 package net.javacoding.jspider.core.storage.jdbc;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import net.javacoding.jspider.core.logging.Log;
 import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.model.FolderInternal;
@@ -11,41 +13,55 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * $Id: FolderDAOImpl.java,v 1.2 2003/04/11 16:37:06 vanrogu Exp $
  */
 class FolderDAOImpl implements FolderDAOSPI {
 
-    public static final String ATTRIBUTE_ID = "id";
     public static final int ATTRIBUTE_ID_NDX = 1;
-    public static final String ATTRIBUTE_PARENT = "parent";
     public static final int ATTRIBUTE_PARENT_NDX = 2;
-    public static final String ATTRIBUTE_SITE = "site";
     public static final int ATTRIBUTE_SITE_NDX = 3;
-    public static final String ATTRIBUTE_NAME = "name";
     public static final int ATTRIBUTE_NAME_NDX = 4;
 
     protected Log log;
 
     protected StorageSPI storage;
     protected DBUtil dbUtil;
-    private ConcurrentHashMap<Integer,FolderInternal> byId = new ConcurrentHashMap<>(  );
-    private ConcurrentHashMap<Integer,Set<FolderInternal>> byParent = new ConcurrentHashMap<>(  );
-    private ConcurrentHashMap<Integer,Set<FolderInternal>> siteRoots = new ConcurrentHashMap<>(  );
+
+    private Cache<Integer, FolderInternal> byId;
+    private Cache<Integer, Set<FolderInternal>> byParent;
+    private Cache<Integer, Set<FolderInternal>> siteRoots;
 
     public FolderDAOImpl ( StorageSPI storage, DBUtil dbUtil ) {
         this.log = LogFactory.getLog(FolderDAOSPI.class);
         this.storage = storage;
         this.dbUtil = dbUtil;
+        byId = CacheBuilder.newBuilder()
+                        .maximumSize( 100000 )
+                        .expireAfterAccess( 15, TimeUnit.MINUTES )
+                        .recordStats()
+                        .concurrencyLevel( 32 )
+                        .build();
+        byParent = CacheBuilder.newBuilder()
+                        .maximumSize( 100000 )
+                        .expireAfterAccess( 15, TimeUnit.MINUTES )
+                        .recordStats()
+                        .concurrencyLevel( 32 )
+                        .build();
+        siteRoots = CacheBuilder.newBuilder()
+                        .maximumSize( 100000 )
+                        .expireAfterAccess( 15, TimeUnit.MINUTES )
+                        .recordStats()
+                        .concurrencyLevel( 32 )
+                        .build();
     }
 
     public FolderInternal[] findSiteRootFolders(SiteInternal site) {
-        Set<FolderInternal> rootFolders = siteRoots.get( site.getId() );
+        Set<FolderInternal> rootFolders = siteRoots.getIfPresent( site.getId() );
         if ( rootFolders != null ) {
             synchronized (rootFolders) {
                 return rootFolders.toArray( new FolderInternal[rootFolders.size()] );
@@ -69,17 +85,14 @@ class FolderDAOImpl implements FolderDAOSPI {
         } finally {
             dbUtil.safeClose(rs, log);
         }
-        Set<FolderInternal> previous = siteRoots.putIfAbsent( site.getId(), rootFolders );
-        if ( previous != null ) {
-            rootFolders = previous;
-        }
+        siteRoots.put( site.getId(), rootFolders );
         synchronized (rootFolders) {
             return rootFolders.toArray(new FolderInternal[rootFolders.size()]);
         }
     }
 
     public FolderInternal[] findSubFolders(FolderInternal folder) {
-        Set<FolderInternal> subFolders = byParent.get( folder.getParentId() );
+        Set<FolderInternal> subFolders = byParent.getIfPresent( folder.getParentId() );
         if ( subFolders != null ) {
             synchronized (subFolders) {
                 return subFolders.toArray( new FolderInternal[subFolders.size()] );
@@ -103,17 +116,14 @@ class FolderDAOImpl implements FolderDAOSPI {
         } finally {
             dbUtil.safeClose(rs, log);
         }
-        Set<FolderInternal> previous = byParent.put( folder.getParentId(), subFolders );
-        if ( previous != null ) {
-            subFolders = previous;
-        }
+        byParent.put( folder.getParentId(), subFolders );
         synchronized (subFolders) {
             return subFolders.toArray(new FolderInternal[subFolders.size()]);
         }
     }
 
     public FolderInternal findById(int folderId) {
-        FolderInternal folder = byId.get( folderId );
+        FolderInternal folder = byId.getIfPresent( folderId );
         if ( folder != null ) {
             return folder;
         }
@@ -172,13 +182,10 @@ class FolderDAOImpl implements FolderDAOSPI {
     }
 
     private void addSiteRoot( int siteId, FolderInternal folder ) {
-        Set<FolderInternal> rootFolders = siteRoots.get( siteId );
+        Set<FolderInternal> rootFolders = siteRoots.getIfPresent( siteId );
         if ( rootFolders == null ) {
             rootFolders = new HashSet<>(  );
-            Set<FolderInternal> previousSet = siteRoots.putIfAbsent( siteId, rootFolders );
-            if ( previousSet != null ) {
-                rootFolders = previousSet;
-            }
+            siteRoots.put( siteId, rootFolders );
         }
         synchronized (rootFolders) {
             rootFolders.add( folder );
@@ -186,13 +193,10 @@ class FolderDAOImpl implements FolderDAOSPI {
     }
 
     private void addSubFolder( int parent, FolderInternal folder ) {
-        Set<FolderInternal> subFolders = byParent.get( parent );
+        Set<FolderInternal> subFolders = byParent.getIfPresent( parent );
         if ( subFolders == null ) {
             subFolders = new HashSet<>(  );
-            Set<FolderInternal> previousSet = byParent.putIfAbsent( parent, subFolders );
-            if ( previousSet != null ) {
-                subFolders = previousSet;
-            }
+            byParent.put( parent, subFolders );
         }
         synchronized (subFolders) {
             subFolders.add( folder );
