@@ -44,16 +44,16 @@ public class JdbcStorageImpl implements StorageSPI {
                 Connection connection = dbUtil.getConnection();
         ) {
             Statement st = connection.createStatement();
-            st.executeUpdate("delete from jspider_site");
-            st.executeUpdate("delete from jspider_resource");
-            st.executeUpdate("delete from jspider_content");
-            st.executeUpdate("delete from jspider_cookie");
-            st.executeUpdate("delete from jspider_resource_reference");
-            st.executeUpdate("delete from jspider_decision");
-            st.executeUpdate("delete from jspider_decision_step");
-            st.executeUpdate("delete from jspider_email_address");
-            st.executeUpdate("delete from jspider_email_address_reference");
-            st.executeUpdate("delete from jspider_folder");
+            st.executeUpdate("truncate jspider_content");
+            st.executeUpdate("truncate jspider_cookie");
+            st.executeUpdate("truncate jspider_decision");
+            st.executeUpdate("truncate jspider_decision_step");
+            st.executeUpdate("truncate jspider_site");
+            st.executeUpdate("truncate jspider_resource");
+            st.executeUpdate("truncate jspider_resource_reference");
+            st.executeUpdate("truncate jspider_email_address");
+            st.executeUpdate("truncate jspider_email_address_reference");
+            st.executeUpdate("truncate jspider_folder");
         } catch (SQLException e) {
             LogFactory.getLog(JdbcStorageImpl.class).error("SQLException during emtpy of database", e);
         }
