@@ -34,7 +34,6 @@ class FolderDAOImpl implements FolderDAOSPI {
 
     private Cache<Integer, FolderInternal> byId;
     private Cache<Integer, Set<FolderInternal>> byParent;
-    private Cache<Integer, Set<FolderInternal>> siteRoots;
 
     public FolderDAOImpl ( StorageSPI storage, DBUtil dbUtil ) {
         this.log = LogFactory.getLog(FolderDAOSPI.class);
@@ -52,22 +51,10 @@ class FolderDAOImpl implements FolderDAOSPI {
                         .recordStats()
                         .concurrencyLevel( 32 )
                         .build();
-        siteRoots = CacheBuilder.newBuilder()
-                        .maximumSize( 100000 )
-                        .expireAfterAccess( 15, TimeUnit.MINUTES )
-                        .recordStats()
-                        .concurrencyLevel( 32 )
-                        .build();
     }
 
     public FolderInternal[] findSiteRootFolders(SiteInternal site) {
-        Set<FolderInternal> rootFolders = siteRoots.getIfPresent( site.getId() );
-        if ( rootFolders != null ) {
-            synchronized (rootFolders) {
-                return rootFolders.toArray( new FolderInternal[rootFolders.size()] );
-            }
-        }
-        rootFolders = new HashSet<>(  );
+        Set<FolderInternal> rootFolders = new HashSet<>(  );
 
         String sql = "select * from jspider_folder where parent=0 and site=?";
         ResultSet rs = null;
@@ -85,10 +72,7 @@ class FolderDAOImpl implements FolderDAOSPI {
         } finally {
             dbUtil.safeClose(rs, log);
         }
-        siteRoots.put( site.getId(), rootFolders );
-        synchronized (rootFolders) {
-            return rootFolders.toArray(new FolderInternal[rootFolders.size()]);
-        }
+        return rootFolders.toArray(new FolderInternal[rootFolders.size()]);
     }
 
     public FolderInternal[] findSubFolders(FolderInternal folder) {
@@ -154,9 +138,7 @@ class FolderDAOImpl implements FolderDAOSPI {
     }
 
     public FolderInternal createFolder(int id, SiteInternal site, String name) {
-        FolderInternal folder = createFolder( id, site.getId(), 0, name );
-        addSiteRoot( site.getId(), folder );
-        return folder;
+        return createFolder( id, site.getId(), 0, name );
     }
 
     public FolderInternal createFolder ( int id, int siteId, int parentId, String name ) {
@@ -179,17 +161,6 @@ class FolderDAOImpl implements FolderDAOSPI {
         }
 
         return folder;
-    }
-
-    private void addSiteRoot( int siteId, FolderInternal folder ) {
-        Set<FolderInternal> rootFolders = siteRoots.getIfPresent( siteId );
-        if ( rootFolders == null ) {
-            rootFolders = new HashSet<>(  );
-            siteRoots.put( siteId, rootFolders );
-        }
-        synchronized (rootFolders) {
-            rootFolders.add( folder );
-        }
     }
 
     private void addSubFolder( int parent, FolderInternal folder ) {
