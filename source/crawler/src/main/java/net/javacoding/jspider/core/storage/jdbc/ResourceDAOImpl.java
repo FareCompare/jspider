@@ -1,7 +1,5 @@
 package net.javacoding.jspider.core.storage.jdbc;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import net.javacoding.jspider.core.event.impl.*;
 import net.javacoding.jspider.core.model.*;
 import net.javacoding.jspider.core.storage.spi.ResourceDAOSPI;
@@ -16,7 +14,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * $Id: ResourceDAOImpl.java,v 1.11 2003/04/19 19:00:46 vanrogu Exp $
@@ -47,26 +44,14 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     protected Log log;
 
     /** Resource cache. */
-    protected Cache<URL, ResourceInternal> knownURLs;
-    protected Cache<Integer, ResourceInternal> byId;
+    protected Map<URL, ResourceInternal> knownURLs = new ConcurrentHashMap<>(  );
+    protected Map<Integer, ResourceInternal> byId = new ConcurrentHashMap<>(  );
 
 
     public ResourceDAOImpl(StorageSPI storage, DBUtil dbUtil) {
         this.storage = storage;
         this.dbUtil = dbUtil;
         this.log = LogFactory.getLog(ResourceDAOImpl.class);
-        knownURLs = CacheBuilder.newBuilder()
-                        .maximumSize( 100000 )
-                        .expireAfterAccess( 15, TimeUnit.MINUTES )
-                        .recordStats()
-                        .concurrencyLevel( 32 )
-                        .build();
-        byId = CacheBuilder.newBuilder()
-                        .maximumSize( 100000 )
-                        .expireAfterAccess( 15, TimeUnit.MINUTES )
-                        .recordStats()
-                        .concurrencyLevel( 32 )
-                        .build();
     }
 
     public void registerURLReference(URL url, URL refererURL) {
@@ -306,7 +291,7 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     }
 
     public ResourceInternal getResource(int id) {
-        ResourceInternal resource = byId.getIfPresent( id );
+        ResourceInternal resource = byId.get( id );
         if ( resource != null ) {
             return resource;
         }
@@ -332,7 +317,7 @@ class ResourceDAOImpl implements ResourceDAOSPI {
     }
 
     public ResourceInternal getResource(URL url) {
-        ResourceInternal resource = knownURLs.getIfPresent( url );
+        ResourceInternal resource = knownURLs.get( url );
         if ( resource != null ) {
             return resource;
         }

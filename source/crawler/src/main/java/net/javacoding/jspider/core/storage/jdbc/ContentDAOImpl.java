@@ -1,5 +1,7 @@
 package net.javacoding.jspider.core.storage.jdbc;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import net.javacoding.jspider.core.logging.Log;
 import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.storage.spi.ContentDAOSPI;
@@ -15,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -27,13 +30,19 @@ class ContentDAOImpl implements ContentDAOSPI {
     protected DBUtil dbUtil;
     protected StorageSPI storage;
     /** Use as cache. */
-    protected Map<Integer, byte[]> contents;
+    protected Cache<Integer, byte[]> contents;
 
     public ContentDAOImpl( StorageSPI storage, DBUtil dbUtil ) {
         this.log = LogFactory.getLog( this.getClass() );
         this.dbUtil = dbUtil;
         this.storage = storage;
-        this.contents = new ConcurrentHashMap<>( );
+        this.contents = CacheBuilder.newBuilder()
+                .maximumSize( 50000 )
+                .expireAfterAccess( 15, TimeUnit.MINUTES )
+                .recordStats()
+                .concurrencyLevel( 32 )
+                .build();
+
     }
 
     private void setBytesInCache(int id, byte[] bytes) {
@@ -62,7 +71,7 @@ class ContentDAOImpl implements ContentDAOSPI {
     }
 
     private InputStream getInputStreamFromCache(int id) {
-        byte[] bytes = contents.get( id );
+        byte[] bytes = contents.getIfPresent( id );
         if ( bytes != null ) {
             return new ByteArrayInputStream ( bytes );
         } else {
