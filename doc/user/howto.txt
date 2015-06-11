@@ -76,6 +76,11 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
      ORDER BY 1
      );
 
+    --
+    -- Show not crawled
+    -- These queries will show what urls in the url_validation table were not crawled. - Farecompare only
+    --
+
     -- Site Code 1 - old
     SELECT COUNT(*) FROM (
     SELECT linkUrl FROM seo_en.urlvalidation WHERE redirect = 0 AND linkUrl NOT IN(
@@ -84,13 +89,15 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
              ) t;
 
     -- Site Code 2
-    SELECT COUNT(*) FROM (
+    SELECT * FROM (
     SELECT uri FROM seo_ml.url_validation WHERE siteCode = 2 AND returnCode = 200 AND uri NOT IN(
            SELECT SUBSTR(url from length('http://alpha.farecompare.com/es/')) as part
              FROM seo_spider.jspider_resource WHERE url LIKE 'http://alpha.farecompare.com/es%' )
-             ) t;
+             ) t
+    INTO OUTFILE '/usr/local/jspider/output/not_crawled_report_D150610_01.csv'
+               FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+               LINES TERMINATED BY '\n';
 
-    -- These queries will show what url in the url_validation table were not crawled. - Farecompare only
     -- Site Code 4
     SELECT COUNT(*) FROM (
     SELECT uri FROM seo_ml.url_validation WHERE siteCode = 4 AND returnCode = 200 AND uri NOT IN(
