@@ -96,34 +96,38 @@ public class SchedulerImpl implements Scheduler {
     }
 
     public void block(URL siteURL, DecideOnSpideringTask task) {
-        ArrayList<DecideOnSpideringTask> al = blocked.get(siteURL);
-        if ( al == null ) {
-            al = new ArrayList<>();
-            ArrayList<DecideOnSpideringTask> previous = blocked.putIfAbsent( siteURL, al );
-            if ( previous != null ) {
-                al = previous;
+        synchronized (blocked) {
+            ArrayList<DecideOnSpideringTask> al = blocked.get(siteURL);
+            if ( al == null ) {
+                al = new ArrayList<>();
+                ArrayList<DecideOnSpideringTask> previous = blocked.putIfAbsent( siteURL, al );
+                if ( previous != null ) {
+                    al = previous;
+                }
             }
-        }
-        int before;
-        int after;
-        synchronized ( al ) {
-            before = al.size();
-            al.add(task);
-            after = al.size();
-        }
+            int before;
+            int after;
+            synchronized ( al ) {
+                before = al.size();
+                al.add(task);
+                after = al.size();
+            }
 
-        int diff = after-before;
-        blockedCount+=diff;
+            int diff = after-before;
+            blockedCount+=diff;
+        }
     }
 
     public DecideOnSpideringTask[] unblock(URL siteURL) {
-        ArrayList<DecideOnSpideringTask> al = blocked.remove( siteURL );
-        if ( al == null ) {
-            return new DecideOnSpideringTask[0];
-        } else {
-            synchronized (al) {
-                blockedCount-=al.size();
-                return al.toArray(new DecideOnSpideringTask[al.size()]);
+        synchronized (blocked) {
+            ArrayList<DecideOnSpideringTask> al = blocked.remove( siteURL );
+            if ( al == null ) {
+                return new DecideOnSpideringTask[0];
+            } else {
+                synchronized (al) {
+                    blockedCount-=al.size();
+                    return al.toArray(new DecideOnSpideringTask[al.size()]);
+                }
             }
         }
     }

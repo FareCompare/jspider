@@ -35,8 +35,14 @@ public class TestURLFinder {
 //        inputStream = getClass().getClassLoader().getResourceAsStream( "es-BOS.city.html" );
 //        url = new URL( "http://alpha.farecompare.com/es/vuelos/Boston-BOS/city.html" );
 
-        inputStream = getClass().getClassLoader().getResourceAsStream( "USMA-state.html" );
-        url = new URL( "http://alpha.farecompare.com/es/vuelos/Massachusetts-USMA/state.html" );
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "USMA-state.html" );
+//        url = new URL( "http://alpha.farecompare.com/es/vuelos/Massachusetts-USMA/state.html" );
+
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "es-BOG.city.html" );
+//        url = new URL( "http://alpha.farecompare.com/es/vuelos/Bogot%C3%A1-BOG/city.html" );
+
+        inputStream = getClass().getClassLoader().getResourceAsStream( "es-index.html" );
+        url = new URL( "http://alpha.farecompare.com/es/index.html" );
     }
 
     @Test
@@ -44,6 +50,7 @@ public class TestURLFinder {
         StopWatch timer = new StopWatch( true );
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         String line;
+        int lines = 0;
         while ( (line = br.readLine()) != null ) {
             URLFinder.findURLs(new URLFinderCallback() {
 
