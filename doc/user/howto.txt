@@ -83,9 +83,9 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
 
     -- Site Code 1 - old
     SELECT COUNT(*) FROM (
-    SELECT linkUrl FROM seo_en.urlvalidation WHERE redirect = 0 AND linkUrl NOT IN(
+    SELECT uri FROM seo_ml.url_validation WHERE siteCode = 1 AND returnCode = 200 AND uri NOT IN(
            SELECT SUBSTR(url from length('http://www.farecompare.com/')) as part
-             FROM seo_spider.jspider_resource WHERE url LIKE 'http://www.farecompare.com/%')
+             FROM seo_spider.jspider_resource WHERE url LIKE 'http://www.farecompare.com/%' )
              ) t;
 
     -- Site Code 2
