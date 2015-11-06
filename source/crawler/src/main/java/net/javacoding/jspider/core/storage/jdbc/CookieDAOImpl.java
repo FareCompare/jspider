@@ -1,91 +1,99 @@
 package net.javacoding.jspider.core.storage.jdbc;
 
+import net.javacoding.jspider.api.model.Cookie;
+import net.javacoding.jspider.core.logging.Log;
+import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.storage.CookieDAO;
 import net.javacoding.jspider.core.storage.spi.CookieDAOSPI;
 import net.javacoding.jspider.core.storage.spi.StorageSPI;
-import net.javacoding.jspider.core.logging.LogFactory;
-import net.javacoding.jspider.core.logging.Log;
-import net.javacoding.jspider.api.model.Cookie;
+import org.apache.commons.lang.StringUtils;
 
-import java.util.*;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * $Id: CookieDAOImpl.java,v 1.3 2003/04/11 16:37:05 vanrogu Exp $
  */
 class CookieDAOImpl implements CookieDAOSPI {
-
     protected Log log;
-
     protected StorageSPI storage;
     protected DBUtil dbUtil;
     protected Map cookies;
 
-    public CookieDAOImpl ( StorageSPI storage, DBUtil dbUtil ) {
-        this.log = LogFactory.getLog(CookieDAO.class);
+    public CookieDAOImpl( StorageSPI storage, DBUtil dbUtil ) {
+        this.log = LogFactory.getLog( CookieDAO.class );
         this.storage = storage;
         this.dbUtil = dbUtil;
-        this.cookies = new HashMap ( );
+        this.cookies = new HashMap();
     }
 
-    public Cookie[] find(int id) {
-        ArrayList al = new ArrayList ( );
-        String sql = "select * from jspider_cookie where site=?";
+    public Cookie[] find( int id ) {
+        ArrayList<Cookie> al = new ArrayList<>();
+        String sql = "select name, `value`, path, domain, expires from jspider_cookie where site = ?";
         ResultSet rs = null;
+
         try (
                 Connection connection = dbUtil.getConnection();
                 PreparedStatement ps = connection.prepareStatement( sql )
         ) {
             ps.setInt( 1, id );
             rs = ps.executeQuery();
+
             while ( rs.next() ) {
-                al.add(createCookieFromRecord(rs));
-            }
-        } catch (SQLException e) {
-            log.error("SQLException", e);
-        } finally {
-            dbUtil.safeClose(rs, log);
-        }
-        return (Cookie[]) al.toArray(new Cookie[al.size()]);
-    }
+                int index = 0;
 
-    public void save(int id, Cookie[] cookies) {
+                String name = rs.getString( ++index );
+                String value = rs.getString( ++index );
+                String path = rs.getString( ++index );
+                String domain = rs.getString( ++index );
+                String expires = rs.getString( ++index );
 
-        Statement st = null;
-        ResultSet rs = null;
-
-        for (int i = 0; i < cookies.length; i++) {
-            Cookie cookie = cookies[i];
-            try (
-                    Connection connection = dbUtil.getConnection();
-            ) {
-                st = connection.createStatement();
-                rs = st.executeQuery("select count(*) as count from jspider_cookie where id='" + id + "' and name='" + cookie.getName() + "'");
-                rs.next();
-                int count = rs.getInt("count");
-                if ( count == 0 ) {
-                    st = connection.createStatement();
-                    st.executeUpdate("insert into jspider_cookie ( site, name, value, path, expires, domain ) values ( '" + id + "', '" + cookie.getName() + "', '" + cookie.getValue() + "', '"+  cookie.getPath() + "', '" + cookie.getExpires() + "', '" + cookie.getDomain() + "')");
-                } else {
-                    st = connection.createStatement();
-                    st.executeUpdate("update jspider_cookie set value='" + cookie.getValue() + "', path='" + cookie.getPath() + "', domain='"+  cookie.getDomain() + "', expires='" + cookie.getExpires() + "' where site='" + id + "' and name='" + cookie.getName() + "'");
-                }
-            } catch (SQLException e) {
-                log.error("SQLException", e);
-            } finally {
-                dbUtil.safeClose(rs, log);
-                dbUtil.safeClose(st, log);
+                al.add( new Cookie( name, value, domain, path, expires ) );
             }
         }
+        catch ( SQLException e ) {
+            log.error( "SQLException", e );
+        }
+        finally {
+            dbUtil.safeClose( rs, log );
+        }
+        return al.toArray( new Cookie[al.size()] );
     }
 
-    protected static Cookie createCookieFromRecord ( ResultSet rs ) throws SQLException {
-        String name = rs.getString("name") ;
-        String value = rs.getString("value") ;
-        String path = rs.getString("path") ;
-        String domain = rs.getString("domain") ;
-        String expires = rs.getString("expires") ;
-        return new Cookie(name, value, domain, path, expires);
-    }
+    public void save( int id, Cookie[] cookies ) {
+        String sql = "insert into jspider_cookie ( site, name, `value`, path, expires, domain )\n" +
+                     "    values ({values})\n" +
+                     "  on duplicate key update\n" +
+                     "    `value` = values(`value`),\n" +
+                     "    path = values(path),\n" +
+                     "    expires = values(expires),\n" +
+                     "    domain = values(domain)";
 
+        sql = StringUtils.replace( sql, "{values}", StringUtils.repeat( "?", ", ", cookies.length * 6 ) );
+
+        try (
+                Connection connection = dbUtil.getConnection();
+                PreparedStatement statement = connection.prepareStatement( sql )
+        ) {
+            int index = 0;
+            for ( Cookie cookie : cookies ) {
+                statement.setInt( ++index, id );
+                statement.setString( ++index, cookie.getName() );
+                statement.setString( ++index, cookie.getValue() );
+                statement.setString( ++index, cookie.getPath() );
+                statement.setString( ++index, cookie.getExpires() );
+                statement.setString( ++index, cookie.getDomain() );
+            }
+
+            statement.executeUpdate();
+        }
+        catch ( SQLException e ) {
+            log.error( "SQLException saving cookies", e );
+        }
+    }
 }

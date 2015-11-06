@@ -9,7 +9,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,50 +21,52 @@ import java.util.zip.GZIPOutputStream;
  * $Id: ContentDAOImpl.java,v 1.3 2003/04/11 16:37:05 vanrogu Exp $
  */
 class ContentDAOImpl implements ContentDAOSPI {
-    public static final Charset CHARSET_UTF8 = Charset.forName( "UTF-8" );
     protected Log log;
     protected DBUtil dbUtil;
     protected StorageSPI storage;
-    /** Use as cache. */
+    /**
+     * Use as cache.
+     */
     protected Map<Integer, byte[]> contents;
 
     public ContentDAOImpl( StorageSPI storage, DBUtil dbUtil ) {
         this.log = LogFactory.getLog( ContentDAOSPI.class );
         this.dbUtil = dbUtil;
         this.storage = storage;
-        this.contents = new ConcurrentHashMap<>( );
+        this.contents = new ConcurrentHashMap<>();
     }
 
-    private void setBytesInCache(int id, byte[] bytes) {
-        contents.put( id, bytes);
+    private void setBytesInCache( int id, byte[] bytes ) {
+        contents.put( id, bytes );
     }
 
     public void setBytes( int id, byte[] bytes ) {
         setBytesInCache( id, bytes );
+        String sql = "insert into jspider_content ( id, content )\n" +
+                     "    values ( ?, ? )\n" +
+                     "  on duplicate key update\n" +
+                     "    content = values(content)," +
+                     "    counter = counter + 1";
+
         try (
                 Connection connection = dbUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement(
-                        "INSERT INTO jspider_content ( id, content ) VALUES ( ?, ? )" );
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
             ps.setInt( 1, id );
             ps.setBytes( 2, compressBytes( bytes ) );
-            try {
-                ps.execute();
-            }
-            catch ( IllegalArgumentException e ) {
-                log.error( "IllegalArgumentException", e );
-            }
+            ps.execute();
         }
         catch ( Exception e ) {
             log.error( "Failed to insert content into table. " + bytes.length + " bytes long", e );
         }
     }
 
-    private InputStream getInputStreamFromCache(int id) {
+    private InputStream getInputStreamFromCache( int id ) {
         byte[] bytes = contents.get( id );
         if ( bytes != null ) {
-            return new ByteArrayInputStream ( bytes );
-        } else {
+            return new ByteArrayInputStream( bytes );
+        }
+        else {
             return null;
         }
     }
@@ -76,16 +77,17 @@ class ContentDAOImpl implements ContentDAOSPI {
             return inputStream;
         }
 
-        byte[] bytes = null;
+        String sql = "SELECT content FROM jspider_content WHERE id=?";
+        byte[] bytes = new byte[0];
         ResultSet rs = null;
         try (
                 Connection connection = dbUtil.getConnection();
-                PreparedStatement ps = connection.prepareStatement( "SELECT content FROM jspider_content WHERE id=?" );
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
             ps.setInt( 1, id );
             rs = ps.executeQuery();
             if ( rs.next() ) {
-                byte[] compressedBytes = rs.getBytes( "content" );
+                byte[] compressedBytes = rs.getBytes( 1 );
                 bytes = deCompressBytes( compressedBytes, 0, compressedBytes.length );
             }
         }

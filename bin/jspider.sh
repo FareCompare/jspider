@@ -20,6 +20,7 @@ export JSPIDER_OPTS="$JSPIDER_OPTS -Dlog4j.configuration=conf/logging/log4j.xml"
 export JSPIDER_CLASSPATH=
 export JSPIDER_CLASSPATH="$JSPIDER_HOME/lib/jspider.jar"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/velocity-dep-1.3.1.jar"
+export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/commons-lang-2.6.jar"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/commons-logging.jar"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/log4j-1.2.8.jar"
 export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/mysql-connector-java-5.1.28.jar"

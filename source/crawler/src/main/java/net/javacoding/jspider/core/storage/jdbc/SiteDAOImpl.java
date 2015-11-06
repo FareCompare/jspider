@@ -1,215 +1,198 @@
 package net.javacoding.jspider.core.storage.jdbc;
 
+import net.javacoding.jspider.core.logging.Log;
+import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.model.SiteInternal;
 import net.javacoding.jspider.core.storage.spi.SiteDAOSPI;
 import net.javacoding.jspider.core.storage.spi.StorageSPI;
-import net.javacoding.jspider.core.logging.LogFactory;
-import net.javacoding.jspider.core.logging.Log;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 /**
  * $Id: SiteDAOImpl.java,v 1.8 2003/04/11 16:37:06 vanrogu Exp $
  */
 class SiteDAOImpl implements SiteDAOSPI {
-
-    public static final String ATTRIBUTE_ID = "id";
-    public static final String ATTRIBUTE_HOST = "host";
-    public static final String ATTRIBUTE_PORT = "port";
-    public static final String ATTRIBUTE_STATE = "state";
-    public static final String ATTRIBUTE_OBEYROBOTSTXT = "obeyrobotstxt";
-    public static final String ATTRIBUTE_USEPROXY = "useproxy";
-    public static final String ATTRIBUTE_USECOOKIES = "usecookies";
-    public static final String ATTRIBUTE_HASROBOTSTXT = "hasrobotstxt";
-    public static final String ATTRIBUTE_USERAGENT = "useragent";
-    public static final String ATTRIBUTE_BASESITE = "basesite";
-    public static final String ATTRIBUTE_HANDLE = "handle";
-
     protected DBUtil dbUtil;
     protected StorageSPI storage;
     protected Log log;
 
-    public SiteDAOImpl(StorageSPI storage, DBUtil dbUtil) {
+    public SiteDAOImpl( StorageSPI storage, DBUtil dbUtil ) {
         this.storage = storage;
         this.dbUtil = dbUtil;
-        this.log = LogFactory.getLog(SiteDAOImpl.class);
+        this.log = LogFactory.getLog( SiteDAOImpl.class );
     }
 
-    public SiteInternal find(URL siteURL) {
-        SiteInternal site = null;
-        Statement st = null;
+    public SiteInternal find( URL siteURL ) {
+        String sql = "select id, host, port, useCookies, useProxy, state, obeyRobotsTxt, baseSite, userAgent, handle\n" +
+                     "  from jspider_site\n" +
+                     "  where host = ?\n" +
+                     "    and port = ?";
+
         ResultSet rs = null;
+
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_site where host = '" + siteURL.getHost() + "' and port = " + siteURL.getPort());
-            if (rs.next()) {
-                site = createSiteFromRecord(rs);
-            } else {
-                return null;
+            preparedStatement.setString( 1, siteURL.getHost() );
+            preparedStatement.setInt( 2, siteURL.getPort() );
+
+            rs = preparedStatement.executeQuery();
+
+            if ( rs.next() ) {
+                return createSiteFromRecord( rs );
             }
-        } catch (SQLException e) {
-            log.error("SQLException", e);
-        } finally {
-            dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
-        return site;
+        catch ( SQLException e ) {
+            log.error( "SQLException", e );
+        }
+        finally {
+            dbUtil.safeClose( rs, log );
+        }
+
+        return null;
     }
 
-    public SiteInternal find(int id) {
-        SiteInternal site = null;
-        Statement st = null;
+    public SiteInternal find( int id ) {
+        String sql = "select id, host, port, useCookies, useProxy, state, obeyRobotsTxt, baseSite, userAgent, handle\n" +
+                     "  from jspider_site\n" +
+                     "  where id = ?";
+
         ResultSet rs = null;
+
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_site id=" + id);
-            if (rs.next()) {
-                site = createSiteFromRecord(rs);
-            } else {
-                return null;
+            preparedStatement.setInt( 1, id );
+
+            rs = preparedStatement.executeQuery();
+
+            if ( rs.next() ) {
+                return createSiteFromRecord( rs );
             }
-        } catch (SQLException e) {
-            log.error("SQLException", e);
-        } finally {
-            dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
-        return site;
+        catch ( SQLException e ) {
+            log.error( "SQLException", e );
+        }
+        finally {
+            dbUtil.safeClose( rs, log );
+        }
+
+        return null;
     }
 
-    public void create(int id, SiteInternal site) {
-        Statement st = null;
-        StringBuffer sb = new StringBuffer();
-        sb.append("insert into jspider_site (");
-        sb.append("id,");
-        sb.append("host,");
-        sb.append("port,");
-        sb.append("handle,");
-        sb.append("robotstxthandled,");
-        sb.append("usecookies,");
-        sb.append("useproxy,");
-        sb.append("state,");
-        sb.append("obeyrobotstxt,");
-        sb.append("basesite,");
-        sb.append("useragent");
-        sb.append(") values (");
-        sb.append(DBUtil.format(id));
-        sb.append(",");
-        sb.append(DBUtil.format(site.getHost()));
-        sb.append(",");
-        sb.append(DBUtil.format(site.getPort()));
-        sb.append(",");
-        sb.append(DBUtil.format(site.mustHandle()));
-        sb.append(",");
-        sb.append(DBUtil.format(site.isRobotsTXTHandled()));
-        sb.append(",");
-        sb.append(DBUtil.format(site.getUseCookies()));
-        sb.append(",");
-        sb.append(DBUtil.format(site.getUseProxy()));
-        sb.append(",");
-        sb.append(DBUtil.format(site.getState()));
-        sb.append(",");
-        sb.append(DBUtil.format(site.getObeyRobotsTXT()));
-        sb.append(",");
-        sb.append(DBUtil.format(site.isBaseSite()));
-        sb.append(",");
-        sb.append(DBUtil.format(site.getUserAgent()));
-        sb.append(")");
+    public void create( int id, SiteInternal site ) {
+        String sql = "insert into jspider_site (id, host, port, robotsTxtHandled, useCookies, useProxy, state, obeyRobotsTxt, " +
+                     "    baseSite, userAgent, handle) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement ps = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            st.executeUpdate(sb.toString());
-        } catch (SQLException e) {
-            log.error("SQLException", e);
-        } finally {
-            dbUtil.safeClose(st, log);
+            int index = 0;
+            ps.setInt( ++index, id );
+            ps.setString( ++index, site.getHost() );
+            ps.setInt( ++index, site.getPort() );
+            ps.setBoolean( ++index, site.isRobotsTXTHandled() );
+            ps.setBoolean( ++index, site.getUseCookies() );
+            ps.setBoolean( ++index, site.getUseProxy() );
+            ps.setInt( ++index, site.getState() );
+            ps.setBoolean( ++index, site.getObeyRobotsTXT() );
+            ps.setBoolean( ++index, site.isBaseSite() );
+            ps.setString( ++index, site.getUserAgent() );
+            ps.setBoolean( ++index, site.mustHandle() );
+
+            ps.executeUpdate();
+        }
+        catch ( SQLException e ) {
+            log.error( "SQLException", e );
         }
     }
 
-    public void save(int id, SiteInternal site) {
-        StringBuffer sb = new StringBuffer();
-        Statement st = null;
-        sb.append("update jspider_site set ");
-        sb.append("handle=");
-        sb.append(DBUtil.format(site.mustHandle()));
-        sb.append(",robotstxthandled=");
-        sb.append(DBUtil.format(site.isRobotsTXTHandled()));
-        sb.append(",usecookies=");
-        sb.append(DBUtil.format(site.getUseCookies()));
-        sb.append(",useproxy=");
-        sb.append(DBUtil.format(site.getUseProxy()));
-        sb.append(",state=");
-        sb.append(DBUtil.format(site.getState()));
-        sb.append(",obeyrobotstxt=");
-        sb.append(DBUtil.format(site.getObeyRobotsTXT()));
-        sb.append(",basesite=");
-        sb.append(DBUtil.format(site.isBaseSite()));
-        sb.append(",useragent=");
-        sb.append(DBUtil.format(site.getUserAgent()));
-        sb.append(" where id = ");
-        sb.append(DBUtil.format(id));
+    public void save( int id, SiteInternal site ) {
+        String sql = "update jspider_site set\n" +
+                     "    useCookies = ?,\n" +
+                     "    useProxy = ?,\n" +
+                     "    state = ?,\n" +
+                     "    obeyRobotsTxt = ?,\n" +
+                     "    baseSite = ?,\n" +
+                     "    userAgent = ?,\n" +
+                     "    handle = ?,\n" +
+                     "  where id = ?";
+
         try (
                 Connection connection = dbUtil.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement( sql )
         ) {
-            st = connection.createStatement();
-            st.executeUpdate(sb.toString());
-        } catch (SQLException e) {
-            log.error("SQLException", e);
-        } finally {
-            dbUtil.safeClose(st, log);
+            int index = 0;
+
+            preparedStatement.setBoolean( ++index, site.getUseCookies() );
+            preparedStatement.setBoolean( ++index, site.getUseProxy() );
+            preparedStatement.setInt( ++index, site.getState() );
+            preparedStatement.setBoolean( ++index, site.getObeyRobotsTXT() );
+            preparedStatement.setBoolean( ++index, site.isBaseSite() );
+            preparedStatement.setString( ++index, site.getUserAgent() );
+            preparedStatement.setBoolean( ++index, site.mustHandle() );
+
+            preparedStatement.executeUpdate();
+        }
+        catch ( SQLException e ) {
+            log.error( "SQLException", e );
         }
     }
 
     public SiteInternal[] findAll() {
-        ArrayList al = new ArrayList();
-        Statement st = null;
-        ResultSet rs = null;
+        String sql = "SELECT id, host, port, useCookies, useProxy, state, obeyRobotsTxt, baseSite, userAgent, handle\n" +
+                     "    FROM jspider_site";
+
+        ArrayList<SiteInternal> al = new ArrayList<>();
+
         try (
                 Connection connection = dbUtil.getConnection();
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery( sql );
         ) {
-            st = connection.createStatement();
-            rs = st.executeQuery("select * from jspider_site");
-            while (rs.next()) {
-                al.add(createSiteFromRecord(rs));
+            while ( resultSet.next() ) {
+                al.add( createSiteFromRecord( resultSet ) );
             }
-        } catch (SQLException e) {
-            log.error("SQLException", e);
-        } finally {
-            dbUtil.safeClose(rs, log);
-            dbUtil.safeClose(st, log);
         }
-        return (SiteInternal[]) al.toArray(new SiteInternal[al.size()]);
+        catch ( SQLException e ) {
+            log.error( "SQLException", e );
+        }
+
+        return al.toArray( new SiteInternal[al.size()] );
     }
 
+    protected SiteInternal createSiteFromRecord( ResultSet rs ) throws SQLException {
+        int index = 0;
 
-    protected SiteInternal createSiteFromRecord(ResultSet rs) throws SQLException {
-        String host = rs.getString(ATTRIBUTE_HOST);
-        int id = rs.getInt(ATTRIBUTE_ID);
-        int port = rs.getInt(ATTRIBUTE_PORT);
-        int state = rs.getInt(ATTRIBUTE_STATE);
-        boolean obeyRobotsTXT = rs.getInt(ATTRIBUTE_OBEYROBOTSTXT) != 0;
-        boolean useProxy = rs.getInt(ATTRIBUTE_USEPROXY) != 0;
-        boolean useCookies = rs.getInt(ATTRIBUTE_USECOOKIES) != 0;
-        String userAgent = rs.getString(ATTRIBUTE_USERAGENT);
-        boolean baseSite = rs.getInt(ATTRIBUTE_BASESITE) != 0;
-        boolean handle = rs.getInt(ATTRIBUTE_HANDLE) != 0;
+        int id = rs.getInt( ++index );
+        String host = rs.getString( ++index );
+        int port = rs.getInt( ++index );
+        boolean useCookies = rs.getBoolean( ++index );
+        boolean useProxy = rs.getBoolean( ++index );
+        int state = rs.getInt( ++index );
+        boolean obeyRobotsTXT = rs.getBoolean( ++index );
+        boolean baseSite = rs.getBoolean( ++index );
+        String userAgent = rs.getString( ++index );
+        boolean handle = rs.getBoolean( ++index );
 
         URL url = null;
         try {
-            url = new URL("http", host, port, "");
-        } catch (MalformedURLException e) {
+            url = new URL( "http", host, port, "" );
+        }
+        catch ( MalformedURLException e ) {
             e.printStackTrace();
         }
 
-        return new SiteInternal(storage, id, handle, url, state, obeyRobotsTXT, useProxy, useCookies, userAgent, baseSite);
+        return new SiteInternal( storage, id, handle, url, state, obeyRobotsTXT, useProxy, useCookies, userAgent, baseSite );
     }
-
 }

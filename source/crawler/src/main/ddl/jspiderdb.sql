@@ -36,9 +36,11 @@ DROP TABLE IF EXISTS jspider_resource_reference;
 
 CREATE TABLE IF NOT EXISTS jspider_content (
     id      INT(11) NOT NULL DEFAULT '0',
-    content BLOB
+    counter INT     NOT NULL DEFAULT '1',
+    content BLOB,
+    PRIMARY KEY (id)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;
 
 --
 -- Table structure for table 'jspider_cookie'
@@ -52,9 +54,10 @@ CREATE TABLE IF NOT EXISTS jspider_cookie (
     domain  VARCHAR(255) NOT NULL DEFAULT '',
     path    VARCHAR(255) NOT NULL DEFAULT '',
     expires VARCHAR(255)          DEFAULT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY siteNameIdx (site, name)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;
 
 --
 -- Table structure for table 'jspider_decision'
@@ -67,7 +70,7 @@ CREATE TABLE IF NOT EXISTS jspider_decision (
     comment  LONGTEXT NOT NULL,
     PRIMARY KEY (resource, subject)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;
 
 --
 -- Table structure for table 'jspider_decision_step'
@@ -83,7 +86,7 @@ CREATE TABLE IF NOT EXISTS jspider_decision_step (
     comment  LONGTEXT NOT NULL,
     PRIMARY KEY (resource, subject, sequence)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;
 
 --
 -- Table structure for table 'jspider_email_address'
@@ -94,7 +97,7 @@ CREATE TABLE IF NOT EXISTS jspider_email_address (
     address VARCHAR(255) NOT NULL DEFAULT '',
     PRIMARY KEY (id)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;
 
 --
 -- Table structure for table 'jspider_email_address_reference'
@@ -106,7 +109,7 @@ CREATE TABLE IF NOT EXISTS jspider_email_address_reference (
     count    INT(11) NOT NULL DEFAULT '0',
     PRIMARY KEY (resource, address)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;
 
 --
 -- Table structure for table 'jspider_folder'
@@ -121,7 +124,7 @@ CREATE TABLE IF NOT EXISTS jspider_folder (
     KEY parentIdx (parent),
     KEY siteIdx (site)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;
 
 --
 -- Table structure for table 'jspider_resource'
@@ -141,7 +144,7 @@ CREATE TABLE IF NOT EXISTS jspider_resource (
     KEY siteIdx (site),
     KEY folderIdx (folder)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;
 
 --
 -- Table structure for table 'jspider_resource_reference'
@@ -153,7 +156,7 @@ CREATE TABLE IF NOT EXISTS jspider_resource_reference (
     count   INT(11) NOT NULL DEFAULT '0',
     PRIMARY KEY (referer, referee)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;
 
 --
 -- Table structure for table 'jspider_site'
@@ -174,4 +177,4 @@ CREATE TABLE IF NOT EXISTS jspider_site (
     handle           INT(11)      NOT NULL DEFAULT '0',
     PRIMARY KEY (id)
 )
-    ENGINE =InnoDB;
+    ENGINE = InnoDB;

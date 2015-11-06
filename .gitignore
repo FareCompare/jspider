@@ -1,5 +1,6 @@
 *.class
 
+.idea
 # Package Files #
 *.war
 build

@@ -7,6 +7,9 @@ import net.javacoding.jspider.core.storage.spi.StorageSPI;
  * $Id: FolderInternal.java,v 1.2 2003/04/11 16:37:04 vanrogu Exp $
  */
 public class FolderInternal implements Folder {
+    public static FolderInternal newDummyFolderInternal( StorageSPI storage ) {
+        return new FolderInternal( storage, 1, 0, "dummy", 1 );
+    }
 
     protected StorageSPI storage;
     protected int id;
