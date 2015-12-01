@@ -14,7 +14,7 @@ import java.net.URL;
  *
  * $Id: Scheduler.java,v 1.10 2003/04/25 21:28:59 vanrogu Exp $
  *
- * @author  Günther Van Roey
+ * @author  Gï¿½nther Van Roey
  */
 public interface Scheduler {
 
@@ -63,7 +63,7 @@ public interface Scheduler {
      * @throws TaskAssignmentException if all the work is done or no suitable
      * items are found for the moment.
      */
-    public WorkerTask getFethTask() throws TaskAssignmentException;
+    public WorkerTask getFetchTask() throws TaskAssignmentException;
 
     /**
      * Determines whether all the tasks are done.   If there are no more tasks
@@ -121,4 +121,6 @@ public interface Scheduler {
      */
     public int getThinkerJobsDone ( );
 
+    public int getSpiderQueueSize();
+    public int getThinkerQueueSize();
 }

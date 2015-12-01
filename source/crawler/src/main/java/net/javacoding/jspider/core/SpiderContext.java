@@ -11,13 +11,14 @@ import net.javacoding.jspider.core.storage.Storage;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.concurrent.locks.Lock;
 
 
 /**
  *
  * $Id: SpiderContext.java,v 1.17 2003/04/29 17:53:47 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  */
 public interface SpiderContext {
 
@@ -60,5 +61,7 @@ public interface SpiderContext {
     public boolean getUseProxy ( );
 
     public String getUserAgent ( );
+
+    Lock getLock( URL url );
 
 }

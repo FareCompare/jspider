@@ -22,13 +22,14 @@ import net.javacoding.jspider.core.util.URLUtil;
 
 import java.io.ByteArrayInputStream;
 import java.net.URL;
+import java.util.concurrent.locks.Lock;
 
 
 /**
  *
  * $Id: AgentImpl.java,v 1.32 2003/04/29 17:53:47 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  */
 public class AgentImpl implements Agent, CoreEventVisitor {
 
@@ -49,10 +50,15 @@ public class AgentImpl implements Agent, CoreEventVisitor {
 
     }
 
-    public synchronized void start() {
+    public void start() {
         URL baseURL = context.getBaseURL();
-        visit(null, new URLFoundEvent(context, null, baseURL));
-        notifyAll();
+        Lock lock = context.getLock( baseURL );
+        lock.lock();
+        try {
+            visit( null, new URLFoundEvent( context, null, baseURL ) );
+        } finally {
+            lock.unlock();
+        }
     }
 
     public synchronized void flagDone(WorkerTask task) {
@@ -60,7 +66,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         notifyAll();
     }
 
-    public synchronized WorkerTask getThinkerTask() throws TaskAssignmentException {
+    public WorkerTask getThinkerTask() throws TaskAssignmentException {
         while (true) {
             try {
                 return scheduler.getThinkerTask();
@@ -68,7 +74,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
                 throw e;
             } catch (TaskAssignmentException e) {
                 try {
-                    wait();
+                    Thread.sleep( 1000 );
                 } catch (InterruptedException e1) {
                     Thread.currentThread().interrupt();
                 }
@@ -76,15 +82,15 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         }
     }
 
-    public synchronized WorkerTask getSpiderTask() throws TaskAssignmentException {
+    public WorkerTask getSpiderTask() throws TaskAssignmentException {
         while (true) {
             try {
-                return scheduler.getFethTask();
+                return scheduler.getFetchTask();
             } catch (SpideringDoneException e) {
                 throw e;
             } catch (TaskAssignmentException e) {
                 try {
-                    wait();
+                    Thread.sleep( 1000 );
                 } catch (InterruptedException e1) {
                     Thread.currentThread().interrupt();
                 }
@@ -95,46 +101,62 @@ public class AgentImpl implements Agent, CoreEventVisitor {
     /**
      * @param foundURL
      */
-    public synchronized void scheduleForSpidering(URL foundURL) {
-        URL siteURL = URLUtil.getSiteURL(foundURL);
-        Site site = storage.getSiteDAO().find(siteURL);
-        scheduler.schedule(new SpiderHttpURLTask(context, foundURL, site));
-        notifyAll();
+    public void scheduleForSpidering(URL foundURL) {
+        Lock lock = context.getLock( foundURL );
+        lock.lock();
+        try {
+            URL siteURL = URLUtil.getSiteURL(foundURL);
+            Site site = storage.getSiteDAO().find(siteURL);
+            scheduler.schedule( new SpiderHttpURLTask( context, foundURL, site ) );
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public synchronized void scheduleForParsing(URL url) {
-        scheduler.schedule(new InterpreteHTMLTask(context, (FetchedResource) storage.getResourceDAO().getResource(url)));
-        notifyAll();
+    public void scheduleForParsing(URL url) {
+        Lock lock = context.getLock( url );
+        lock.lock();
+        try {
+            scheduler.schedule(
+                    new InterpreteHTMLTask( context, (FetchedResource) storage.getResourceDAO().getResource( url ) ) );
+        } finally {
+            lock.unlock();
+        }
     }
 
-    public synchronized void registerEvent(URL url, CoreEvent event) {
-        event.accept(url, this);
-        notifyAll();
+    public void registerEvent(URL url, CoreEvent event) {
+        Lock lock = context.getLock( url );
+        lock.lock();
+        try {
+            event.accept(url, this);
+        } finally {
+            lock.unlock();
+        }
     }
 
 
     public void visit(URL url, CoreEvent event) {
-        log.error("ERROR -- UNHANDLED COREEVENT IN AGENT !!!");
+        log.error( "ERROR -- UNHANDLED COREEVENT IN AGENT !!!" );
     }
 
     public void visit(URL url, URLSpideredOkEvent event) {
         storage.getResourceDAO().setSpidered(url, event);
-        eventDispatcher.dispatch(new ResourceFetchedEvent(storage.getResourceDAO().getResource(url)));
-        scheduler.schedule(new DecideOnParsingTask(context, url));
+        eventDispatcher.dispatch( new ResourceFetchedEvent( storage.getResourceDAO().getResource( url ) ) );
+        scheduler.schedule( new DecideOnParsingTask( context, url ) );
     }
 
     public void visit(URL url, URLSpideredErrorEvent event) {
-        storage.getResourceDAO().setError(url, event);
+        storage.getResourceDAO().setError( url, event );
         eventDispatcher.dispatch(new ResourceFetchErrorEvent(storage.getResourceDAO().getResource(url), event.getHttpStatus()));
     }
 
     public void visit(URL url, ResourceParsedOkEvent event) {
         storage.getResourceDAO().setParsed(url, event);
-        eventDispatcher.dispatch(new ResourceParsedEvent(storage.getResourceDAO().getResource(url)));
+        eventDispatcher.dispatch( new ResourceParsedEvent( storage.getResourceDAO().getResource( url ) ) );
     }
 
     public void visit(URL url, ResourceParsedErrorEvent event) {
-        storage.getResourceDAO().setError(url, event);
+        storage.getResourceDAO().setError( url, event );
     }
 
     public void visit(URL url, URLFoundEvent event) {
@@ -142,14 +164,20 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         URL siteURL = URLUtil.getSiteURL(foundURL);
         Site site = storage.getSiteDAO().find(siteURL);
 
-        boolean newResource = (storage.getResourceDAO().getResource(foundURL) == null);
-
-        if (site == null) {
+        boolean newSite = site == null;
+        if ( newSite ) {
             site = storage.getSiteDAO().createSite(siteURL);
             context.registerNewSite(site);
             storage.getSiteDAO().save(site);
-
             eventDispatcher.dispatch(new SiteDiscoveredEvent(site));
+        }
+
+        boolean newResource = (storage.getResourceDAO().getResource(foundURL) == null);
+        if ( newResource) {
+            storage.getResourceDAO().registerURL(foundURL);
+        }
+
+        if ( newSite ) {
 
             if (site.getFetchRobotsTXT()) {
                 if (site.mustHandle()) {
@@ -169,13 +197,11 @@ public class AgentImpl implements Agent, CoreEventVisitor {
                         scheduler.schedule(new DecideOnSpideringTask(context, event));
                     }
                 }
-                notifyAll();
             }
         } else if (site.isRobotsTXTHandled()) {
             if (newResource) {
                 scheduler.schedule(new DecideOnSpideringTask(context, event));
             }
-            notifyAll();
         } else {
             if (site.mustHandle()) {
                 if (newResource) {
@@ -185,15 +211,16 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         }
 
         if (newResource) {
-            storage.getResourceDAO().registerURL(foundURL);
             if ( !site.mustHandle()) {
                 storage.getResourceDAO().setIgnoredForFetching(foundURL, event);
             }
             eventDispatcher.dispatch(new ResourceDiscoveredEvent(storage.getResourceDAO().getResource(foundURL)));
         }
         storage.getResourceDAO().registerURLReference(foundURL, url);
-        if (url != null) {
-            eventDispatcher.dispatch(new ResourceReferenceDiscoveredEvent(storage.getResourceDAO().getResource(url), storage.getResourceDAO().getResource(foundURL)));
+        if ( url != null ) {
+            eventDispatcher.dispatch( new ResourceReferenceDiscoveredEvent( storage.getResourceDAO().getResource( url ),
+                                                                            storage.getResourceDAO().getResource(
+                                                                                    foundURL ) ) );
         }
 
     }

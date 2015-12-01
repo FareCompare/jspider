@@ -2,6 +2,7 @@ package net.javacoding.jspider.core.task.work;
 
 
 import net.javacoding.jspider.api.model.HTTPHeader;
+import net.javacoding.jspider.api.model.Resource;
 import net.javacoding.jspider.api.model.Site;
 import net.javacoding.jspider.core.SpiderContext;
 import net.javacoding.jspider.core.logging.Log;
@@ -14,6 +15,7 @@ import net.javacoding.jspider.core.util.URLUtil;
 
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.locks.Lock;
 
 
 /**
@@ -41,7 +43,21 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
     }
 
     public void execute() {
+        Lock lock = context.getLock( url );
+        lock.lock();
+        try {
+            Resource resource = context.getStorage().getResourceDAO().getResource( url );
+            if ( resource != null && resource.getState() != Resource.STATE_DISCOVERED ) {
+                // Some other thread has already spidered this URL
+                return;
+            }
+            doSpider();
+        } finally {
+            lock.unlock();
+        }
+    }
 
+    private void doSpider() {
         CoreEvent event = null;
         URLConnection connection = null;
 
@@ -54,7 +70,7 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
 
             connection = url.openConnection();
 
-            if (connection instanceof HttpURLConnection) {
+            if (connection instanceof HttpURLConnection ) {
                 ((HttpURLConnection) connection).setInstanceFollowRedirects(false);
             }
 
@@ -70,7 +86,7 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
                     case HttpURLConnection.HTTP_MOVED_PERM:
                     case HttpURLConnection.HTTP_MOVED_TEMP:
                         String redirectURL = connection.getHeaderField("location");
-                        notifyEvent(url, new URLFoundEvent(context, url, URLUtil.normalize(new URL(redirectURL))));
+                        notifyEvent(url, new URLFoundEvent(context, url, URLUtil.normalize( new URL( redirectURL ) )));
                         break;
                     default:
                         break;
@@ -90,13 +106,13 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
                         i = is.read();
                     }
             } catch (IOException e) {
-                log.error( "i/o exception during fetch", e );
+                log.warn( "i/o exception during fetch", e );
             }
 
             String contentType = connection.getContentType();
             int timeMs = (int) (System.currentTimeMillis() - start);
 
-            headers = HTTPHeaderUtil.getHeaders(connection);
+            headers = HTTPHeaderUtil.getHeaders( connection );
 
             if (httpStatus >= 200 && httpStatus < 303) {
                 event = new URLSpideredOkEvent(context, url, httpStatus, connection, contentType, timeMs, size, os.toByteArray(), headers);
@@ -111,9 +127,9 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
             event = new URLSpideredErrorEvent(context, url, 404, connection, headers, e);
         } catch (Exception e) {
             if ( httpStatus ==  HttpURLConnection.HTTP_FORBIDDEN ) {
-                log.error( "HTTP Status-Code 403: Forbidden - " + url );
+                log.warn( "HTTP Status-Code 403: Forbidden - " + url, e );
             } else {
-                LogFactory.getLog(this.getClass()).error("exception during spidering", e);
+                log.warn("exception during spidering", e);
             }
             event = new URLSpideredErrorEvent(context, url, httpStatus, connection, headers, e);
         } finally {
@@ -122,7 +138,7 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    log.error( "i/o exception closing inputstream", e );
+                    log.warn( "i/o exception closing inputstream", e );
                 }
             }
         }

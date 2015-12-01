@@ -13,8 +13,10 @@ public class SchedulerMonitorEvent extends MonitorEvent {
     protected int thinkerJobsDone;
     protected int blockedCount;
     protected int assignedCount;
+    protected int spiderQueueSize;
+    protected int thinkerQueueSize;
 
-    public SchedulerMonitorEvent ( int jobCount, int spiderJobsCount, int thinkerJobsCount, int jobsDone, int spiderJobsDone, int thinkerJobsDone, int blockedCount, int assignedCount ) {
+    public SchedulerMonitorEvent ( int jobCount, int spiderJobsCount, int thinkerJobsCount, int jobsDone, int spiderJobsDone, int thinkerJobsDone, int blockedCount, int assignedCount, int spiderQueueSize, int thinkerQueueSize ) {
         this.jobCount= jobCount;
         this.spiderJobsCount= spiderJobsCount;
         this.thinkerJobsCount= thinkerJobsCount;
@@ -23,6 +25,8 @@ public class SchedulerMonitorEvent extends MonitorEvent {
         this.thinkerJobsDone = thinkerJobsDone;
         this.blockedCount = blockedCount;
         this.assignedCount = assignedCount;
+        this.spiderQueueSize = spiderQueueSize;
+        this.thinkerQueueSize = thinkerQueueSize;
     }
 
     public String toString ( ) {
@@ -38,7 +42,12 @@ public class SchedulerMonitorEvent extends MonitorEvent {
         if ( getThinkerJobsCount() != 0) {
             thinkersPctDone = ((getThinkerJobsDone()*100)/getThinkerJobsCount());
         }
-        return "Job monitor: " + pctDone + "% (" + getJobsDone() + "/" + getJobCount() + ")  [S:" + spidersPctDone + "% (" + getSpiderJobsDone() + "/" + getSpiderJobsCount() + ") | T:" + thinkersPctDone + "% (" + getThinkerJobsDone() + "/" + getThinkerJobsCount() + ")] [blocked:" + blockedCount + "] [assigned:" + assignedCount + "]";
+
+        return String.format("Job monitor: %%%s (%s/%s) [S: %%%s (%s/%s) | T: %%%s (%s/%s)] [blocked:%s] [assigned:%s] Queued[S: %s | T: %s] ",
+                      pctDone, getJobsDone(), getJobCount(),
+                      spidersPctDone, getSpiderJobsDone(), getSpiderJobsCount(),
+                      thinkersPctDone, getThinkerJobsDone(), getThinkerJobsCount(),
+                      blockedCount, assignedCount, spiderQueueSize, thinkerQueueSize );
     }
 
     public String getComment() {

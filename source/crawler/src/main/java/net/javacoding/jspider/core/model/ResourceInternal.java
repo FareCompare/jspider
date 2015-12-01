@@ -1,16 +1,30 @@
 package net.javacoding.jspider.core.model;
 
 
-import net.javacoding.jspider.api.model.*;
+import net.javacoding.jspider.api.model.Decision;
+import net.javacoding.jspider.api.model.DecisionStep;
+import net.javacoding.jspider.api.model.EMailAddress;
+import net.javacoding.jspider.api.model.EMailAddressReference;
+import net.javacoding.jspider.api.model.FetchErrorResource;
+import net.javacoding.jspider.api.model.FetchIgnoredResource;
+import net.javacoding.jspider.api.model.Folder;
+import net.javacoding.jspider.api.model.ForbiddenResource;
+import net.javacoding.jspider.api.model.HTTPHeader;
+import net.javacoding.jspider.api.model.ParseErrorResource;
+import net.javacoding.jspider.api.model.ParseIgnoredResource;
+import net.javacoding.jspider.api.model.ParsedResource;
+import net.javacoding.jspider.api.model.Resource;
+import net.javacoding.jspider.api.model.ResourceReference;
+import net.javacoding.jspider.api.model.Site;
+import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.storage.exception.InvalidStateForActionException;
 import net.javacoding.jspider.core.storage.exception.InvalidStateTransitionException;
 import net.javacoding.jspider.core.storage.spi.StorageSPI;
-import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.util.URLUtil;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.Date;
 
 
 /**
@@ -41,7 +55,6 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
     protected Decision spiderDecision;
     protected Decision parseDecision;
 
-
     public ResourceInternal(StorageSPI storage, int id, int siteId, URL url, Date discoveryTime, FolderInternal folder) {
         this.site = siteId;
         this.storage = storage;
@@ -65,7 +78,7 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
         if (state != Resource.STATE_DISCOVERED) {
             LogFactory.getLog(Resource.class).error("error in state transition for resource " + url + ":\n" + this);
             if ( state != Resource.STATE_PARSE_IGNORED ) {
-                throw new InvalidStateTransitionException("cannot set resource fetched - it's not in the discovered state - was " + state);
+                throw new InvalidStateTransitionException("cannot set resource fetched - it's not in the discovered state - was " + state + " : " + getStateName());
             } else {
                 LogFactory.getLog(Resource.class).error("ignoring setFetched for " + url );
                 return;
@@ -84,7 +97,7 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
         if (state != Resource.STATE_DISCOVERED && state != Resource.STATE_FETCH_ERROR) {
             LogFactory.getLog(Resource.class).error("error in state transition for resource " + url + ":\n" + this);
             if ( state != Resource.STATE_PARSE_IGNORED ) {
-                throw new InvalidStateTransitionException("cannot set resource fetch error - it's not in the discovered state - was" + state);
+                throw new InvalidStateTransitionException("cannot set resource fetch error - it's not in the discovered state - was" + state + " : " + getStateName());
             } else {
                 LogFactory.getLog(Resource.class).error("ignoring setFetchError for " + url );
                 return;
@@ -98,7 +111,7 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
     public void setParseError() {
         if (state != Resource.STATE_FETCHED && state != Resource.STATE_PARSE_ERROR) {
             LogFactory.getLog(Resource.class).error("error in state transition for resource " + url + ":\n" + this);
-            throw new InvalidStateTransitionException("cannot set resource parse error - it's not in the fetched state - was " + state);
+            throw new InvalidStateTransitionException("cannot set resource parse error - it's not in the fetched state - was " + state + " : " + getStateName());
         }
         state = Resource.STATE_PARSE_ERROR;
     }
@@ -106,7 +119,7 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
     public void setParsed() {
         if (state != Resource.STATE_FETCHED && state != Resource.STATE_PARSED) {
             LogFactory.getLog(Resource.class).error("error in state transition for resource " + url + ":\n" + this);
-            throw new InvalidStateTransitionException("cannot set resource parsed - it's not in the fetched state - was " + state);
+            throw new InvalidStateTransitionException("cannot set resource parsed - it's not in the fetched state - was " + state + " : " + getStateName());
         }
         state = Resource.STATE_PARSED;
     }
@@ -114,7 +127,7 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
     public void setFetchIgnored() {
         if (state != Resource.STATE_DISCOVERED && state != Resource.STATE_FETCH_IGNORED) {
             LogFactory.getLog(Resource.class).error("error in state transition for resource " + url + ":\n" + this);
-            throw new InvalidStateTransitionException("cannot set resource fetch_ignored - it's not in the discovered state - was " + state);
+            throw new InvalidStateTransitionException("cannot set resource fetch_ignored - it's not in the discovered state - was " + state + " : " + getStateName());
         }
         state = Resource.STATE_FETCH_IGNORED;
     }
@@ -122,7 +135,7 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
     public void setParseIgnored() {
         if (state != Resource.STATE_FETCHED && state != Resource.STATE_PARSE_IGNORED) {
             LogFactory.getLog(Resource.class).error("error in state transition for resource " + url + ":\n" + this);
-            throw new InvalidStateTransitionException("cannot set resource parse_ignored - it's not in the fetched state - was " + state);
+            throw new InvalidStateTransitionException("cannot set resource parse_ignored - it's not in the fetched state - was " + state + " : " + getStateName());
         }
         state = Resource.STATE_PARSE_IGNORED;
     }
@@ -130,7 +143,7 @@ public class ResourceInternal implements ParsedResource, ParseErrorResource, Par
     public void setForbidden() {
         if (state != Resource.STATE_DISCOVERED && state != Resource.STATE_FETCH_FORBIDDEN) {
             LogFactory.getLog(Resource.class).error("error in state transition for resource " + url + ":\n" + this);
-            throw new InvalidStateTransitionException("cannot set resource forbidden - it's not in the discovered state - was " + state);
+            throw new InvalidStateTransitionException("cannot set resource forbidden - it's not in the discovered state - was " + state + " : " + getStateName());
         }
         state = Resource.STATE_FETCH_FORBIDDEN;
     }

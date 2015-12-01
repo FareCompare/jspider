@@ -11,6 +11,7 @@ import net.javacoding.jspider.core.task.dispatch.DispatchThinkerTasks;
 import net.javacoding.jspider.core.threading.ThreadPoolMonitorThread;
 import net.javacoding.jspider.core.threading.WorkerThreadPool;
 import net.javacoding.jspider.core.util.config.*;
+import net.javacoding.jspider.core.util.statistics.StopWatch;
 
 import java.util.concurrent.TimeUnit;
 
@@ -29,7 +30,7 @@ public class SpiderImpl implements Spider {
     protected WorkerThreadPool thinkers;
 
     public SpiderImpl(SpiderContext context, int spiderThreads, int thinkerThreads) {
-        LogFactory.getLog(Spider.class).info("Spider born - threads: spiders: " + spiderThreads + ", thinkers: " + thinkerThreads);
+        LogFactory.getLog(Spider.class).info( "Spider born - threads: spiders: " + spiderThreads + ", thinkers: " + thinkerThreads );
         spiders = new WorkerThreadPool("Spiders", "Spider", spiderThreads);
         thinkers = new WorkerThreadPool("Thinkers", "Thinker", thinkerThreads);
 
@@ -88,26 +89,6 @@ public class SpiderImpl implements Spider {
         context.getEventDispatcher().shutdown();
 
         log.info( "Spidering done!" );
-        log.info( "Elapsed time : " + formatDuration( System.currentTimeMillis() - start ) );
+        log.info( "Elapsed time : " + StopWatch.formatDuration( System.currentTimeMillis() - start ) );
     }
-
-
-    public String formatDuration( long duration ) {
-
-        long ONE_SECOND = TimeUnit.SECONDS.toMillis( 1 );
-        long ONE_MINUTE = TimeUnit.MINUTES.toMillis( 1 );
-        long ONE_HOUR = TimeUnit.HOURS.toMillis( 1 );
-
-        final long hours = duration / (ONE_HOUR);
-        duration = duration % (ONE_HOUR);
-
-        final long minutes = duration / (ONE_MINUTE);
-        duration = duration % (ONE_MINUTE);
-
-        final long seconds = duration / ONE_SECOND;
-        final long milli = duration % ONE_SECOND;
-
-        return String.format( "%02d:%02d:%02d.%03d%n", hours, minutes, seconds, milli );
-    }
-
 }
