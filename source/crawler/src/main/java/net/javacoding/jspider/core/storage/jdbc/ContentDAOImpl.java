@@ -11,12 +11,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -70,8 +67,6 @@ class ContentDAOImpl implements ContentDAOSPI {
     }
 
     private InputStream getInputStreamFromCache( int id ) {
-        byte[] bytes = contents.get( id );
-    private InputStream getInputStreamFromCache(int id) {
         byte[] bytes = contents.getIfPresent( id );
         if ( bytes != null ) {
             return new ByteArrayInputStream( bytes );
