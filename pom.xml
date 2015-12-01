@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.javacoding.jspider</groupId>
     <artifactId>jspider</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <packaging>pom</packaging>
     <name>jspider</name>
 
@@ -44,6 +44,47 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>external.atlassian.jgitflow</groupId>
+                    <artifactId>jgitflow-maven-plugin</artifactId>
+                    <version>1.0-m5.1</version>
+                    <configuration>
+                        <!-- Enable this to push to origin using SSH keys -->
+                        <enableSshAgent>true</enableSshAgent>
+                        <!-- Keep your maven submodules at the same version as the parent POM -->
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <!--
+                          Pusing in-development features to origin allows all devs to see what each other
+                          are working on
+                        -->
+                        <pushFeatures>false</pushFeatures>
+                        <!--
+                          This allows the CI server (e.g. Jenkins) to automatically push new releases to
+                          origin; you can then either manually deploy them or, if you are doing Continuous
+                          Deployments, auto-deploy them to prod
+                        -->
+                        <pushReleases>false</pushReleases>
+                        <!--
+                          Hot Fixes should be pushed to origin as well so that any dev can pick them up
+                        -->
+                        <pushHotfixes>false</pushHotfixes>
+                        <!--
+                          Prevents deployments from dev workstations so that they can be done by a CI
+                          server
+                        -->
+                        <noDeploy>true</noDeploy>
+                        <scmCommentPrefix>[maven-jgitflow]</scmCommentPrefix>
+                        <scmCommentSuffix>[maven-jgitflow]</scmCommentSuffix>
+                        <flowInitContext>
+                            <masterBranchName>master</masterBranchName>
+                            <developBranchName>develop</developBranchName>
+                            <featureBranchPrefix>feature/</featureBranchPrefix>
+                            <releaseBranchPrefix>release/</releaseBranchPrefix>
+                            <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
+                            <versionTagPrefix>${project.artifactId}-</versionTagPrefix>
+                        </flowInitContext>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
