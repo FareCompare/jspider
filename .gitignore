@@ -16,3 +16,4 @@ source/**/target
 idea
 **/velocity.log
 output
+**/pom.xml.versionsBackup
