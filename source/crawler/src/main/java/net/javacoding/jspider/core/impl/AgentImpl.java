@@ -192,6 +192,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
                 if (site.mustHandle()) {
                     ((SiteInternal) site).registerRobotsTXTSkipped();
                     context.registerRobotsTXTSkipped(site);
+                    storage.getSiteDAO().save(site);
                     eventDispatcher.dispatch(new RobotsTXTSkippedEvent(site));
                     if (newResource) {
                         scheduler.schedule(new DecideOnSpideringTask(context, event));
@@ -278,6 +279,16 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         }
         storage.getSiteDAO().save(site);
         eventDispatcher.dispatch(new RobotsTXTMissingEvent(site));
+    }
+
+    public void visit(URL url, RobotsTXTSkippedEvent event) {
+        Site site = event.getSite();
+        ((SiteInternal) site).registerRobotsTXTSkipped();
+        DecideOnSpideringTask[] tasks = scheduler.unblock(site.getURL());
+        for ( DecideOnSpideringTask task : tasks ) {
+            scheduler.schedule( task );
+        }
+        storage.getSiteDAO().save(site);
     }
 
 

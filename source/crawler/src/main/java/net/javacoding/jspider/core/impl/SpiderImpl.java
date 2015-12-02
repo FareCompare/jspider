@@ -1,7 +1,9 @@
 package net.javacoding.jspider.core.impl;
 
 
-import net.javacoding.jspider.api.event.engine.*;
+import net.javacoding.jspider.api.event.engine.SpideringStartedEvent;
+import net.javacoding.jspider.api.event.engine.SpideringStoppedEvent;
+import net.javacoding.jspider.api.event.engine.SpideringSummaryEvent;
 import net.javacoding.jspider.core.Spider;
 import net.javacoding.jspider.core.SpiderContext;
 import net.javacoding.jspider.core.logging.Log;
@@ -10,10 +12,15 @@ import net.javacoding.jspider.core.task.dispatch.DispatchSpiderTasks;
 import net.javacoding.jspider.core.task.dispatch.DispatchThinkerTasks;
 import net.javacoding.jspider.core.threading.ThreadPoolMonitorThread;
 import net.javacoding.jspider.core.threading.WorkerThreadPool;
-import net.javacoding.jspider.core.util.config.*;
+import net.javacoding.jspider.core.util.config.ConfigConstants;
+import net.javacoding.jspider.core.util.config.ConfigurationFactory;
+import net.javacoding.jspider.core.util.config.MappedPropertySet;
+import net.javacoding.jspider.core.util.config.PropertySet;
 import net.javacoding.jspider.core.util.statistics.StopWatch;
 
-import java.util.concurrent.TimeUnit;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 
 /**
@@ -52,6 +59,14 @@ public class SpiderImpl implements Spider {
     }
 
     public void crawl(SpiderContext context) {
+//        System.out.println("Press Enter to start.");
+//        try (
+//                BufferedReader in = new BufferedReader( new InputStreamReader( System.in ) );
+//        ) {
+//            in.readLine();
+//        } catch ( IOException e ) {
+//            e.printStackTrace();
+//        }
 
         long start = System.currentTimeMillis();
 

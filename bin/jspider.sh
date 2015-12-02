@@ -25,21 +25,6 @@ echo "using output=$OUTPUT"
 
 export JSPIDER_OPTS=
 export JSPIDER_OPTS="$JSPIDER_OPTS -Djspider.home=$JSPIDER_HOME"
-export JSPIDER_OPTS="$JSPIDER_OPTS -Djava.util.logging.config.file=$JSPIDER_HOME/common/conf/logging/logging.properties"
-export JSPIDER_OPTS="$JSPIDER_OPTS -Dlog4j.configuration=conf/logging/log4j.xml"
-
-export JSPIDER_CLASSPATH=
-export JSPIDER_CLASSPATH="$JSPIDER_HOME/lib/jspider.jar"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/velocity-dep-1.3.1.jar"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/commons-lang-2.6.jar"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/commons-logging.jar"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/log4j-1.2.8.jar"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/mysql-connector-java-5.1.28.jar"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/c3p0-0.9.1.2.jar"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/commons-lang-2.6.jar"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/lib/guava-18.0.jar"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$JSPIDER_HOME/common"
-export JSPIDER_CLASSPATH="$JSPIDER_CLASSPATH:$CLASSPATH"
 
 JAVA_OPTS="-Xmx16G"
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote"
@@ -56,4 +41,6 @@ JFRFILE=$JSPIDER_HOME/output/jspider_${DATE}.jfr
 #JFR="-XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:+FlightRecorderOptions=\"filename=$JFRFILE,defaultrecording=true,delay=30s,duration=10m\""
 JFR="-XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:StartFlightRecording=filename=$JFRFILE,defaultrecording=true,delay=30s,duration=5m"
 
-nohup java $JAVA_OPTS $DEBUG $JFR -cp $JSPIDER_CLASSPATH:$CLASSPATH $JSPIDER_OPTS net.javacoding.jspider.JSpider $1 $2 > $OUTPUT 2>&1 &
+nohup java $JAVA_OPTS $JSPIDER_OPTS $DEBUG $JFR -jar $JSPIDER_HOME/lib/jspider-crawler-*-exe.jar $1 $2 > $OUTPUT 2>&1 &
+#java $JAVA_OPTS $JSPIDER_OPTS $DEBUG $JFR -jar $JSPIDER_HOME/lib/jspider-crawler-*-exe.jar $1 $2
+

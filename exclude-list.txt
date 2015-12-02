@@ -4,3 +4,5 @@ source
 deploy.sh
 exclude-list.txt
 pom.xml
+pom.xml.versionsBackup
+lib

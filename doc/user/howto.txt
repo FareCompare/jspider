@@ -91,10 +91,10 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
     -- Site Code 2
     SELECT * FROM (
     SELECT uri FROM seo_ml.url_validation WHERE siteCode = 2 AND returnCode = 200 AND uri NOT IN(
-           SELECT SUBSTR(url from length('http://alpha.farecompare.com/es/')) as part
-             FROM seo_spider.jspider_resource WHERE url LIKE 'http://alpha.farecompare.com/es%' )
+           SELECT SUBSTR(url from length('http://stg.farecompare.com/es/')) as part
+             FROM seo_spider.jspider_resource WHERE url LIKE 'http://stg.farecompare.com/es%' )
              ) t
-    INTO OUTFILE '/usr/local/jspider/output/not_crawled_report_D150727_01.csv'
+    INTO OUTFILE '/usr/local/jspider/output/not_crawled_report_D151106_01.csv'
                FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
                LINES TERMINATED BY '\n';
 
