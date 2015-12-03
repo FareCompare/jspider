@@ -13,7 +13,7 @@ import java.net.URLConnection;
  *
  * $$
  *
- * @author Günther Van Roey
+ * @author Gï¿½nther Van Roey
  */
 public class RobotsTXTSpideredOkEvent extends URLSpideredOkEvent {
 
@@ -22,10 +22,6 @@ public class RobotsTXTSpideredOkEvent extends URLSpideredOkEvent {
     public RobotsTXTSpideredOkEvent(URL robotsTXTURL,SpiderContext context, URL url, int httpStatus, URLConnection urlConnection, String mimeType, int timeMs, int size, byte[] bytes, HTTPHeader[] headers) {
         super(context,url, httpStatus, urlConnection, mimeType, timeMs, size, bytes, headers);
         this.robotsTXTURL = robotsTXTURL;
-    }
-
-    public byte[] getBytes() {
-        return bytes;
     }
 
     public String toString() {
