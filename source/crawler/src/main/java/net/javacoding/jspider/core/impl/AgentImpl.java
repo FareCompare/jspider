@@ -160,8 +160,8 @@ public class AgentImpl implements Agent, CoreEventVisitor {
     }
 
     public void visit(URL url, URLFoundEvent event) {
-        URL foundURL = event.getFoundURL();
-        URL siteURL = URLUtil.getSiteURL(foundURL);
+        final URL foundURL = event.getFoundURL();
+        final URL siteURL = URLUtil.getSiteURL(foundURL);
         Site site = storage.getSiteDAO().find(siteURL);
 
         boolean newSite = site == null;
@@ -172,9 +172,10 @@ public class AgentImpl implements Agent, CoreEventVisitor {
             eventDispatcher.dispatch(new SiteDiscoveredEvent(site));
         }
 
-        boolean newResource = (storage.getResourceDAO().getResource(foundURL) == null);
+        Resource resource = storage.getResourceDAO().getResource( foundURL );
+        boolean newResource = (resource == null);
         if ( newResource) {
-            storage.getResourceDAO().registerURL(foundURL);
+            resource = storage.getResourceDAO().registerURL(foundURL);
         }
 
         if ( newSite ) {
@@ -215,13 +216,12 @@ public class AgentImpl implements Agent, CoreEventVisitor {
             if ( !site.mustHandle()) {
                 storage.getResourceDAO().setIgnoredForFetching(foundURL, event);
             }
-            eventDispatcher.dispatch(new ResourceDiscoveredEvent(storage.getResourceDAO().getResource(foundURL)));
+            eventDispatcher.dispatch(new ResourceDiscoveredEvent( resource ));
         }
         storage.getResourceDAO().registerURLReference(foundURL, url);
         if ( url != null ) {
             eventDispatcher.dispatch( new ResourceReferenceDiscoveredEvent( storage.getResourceDAO().getResource( url ),
-                                                                            storage.getResourceDAO().getResource(
-                                                                                    foundURL ) ) );
+                                                                            resource ) );
         }
 
     }
