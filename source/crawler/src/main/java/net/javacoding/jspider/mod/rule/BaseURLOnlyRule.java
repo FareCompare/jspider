@@ -11,7 +11,7 @@ import java.net.URL;
 /**
  * $Id: BaseURLOnlyRule.java,v 1.1 2003/04/03 16:10:49 vanrogu Exp $
  *
- * @author Günther Van Roey.
+ * @author Gunther Van Roey.
  */
 public class BaseURLOnlyRule extends BaseRuleImpl {
 

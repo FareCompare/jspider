@@ -8,7 +8,7 @@ import net.javacoding.jspider.core.storage.spi.*;
  *
  * $Id: InMemoryStorageImpl.java,v 1.24 2003/04/11 16:37:07 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 class InMemoryStorageImpl implements StorageSPI {
 

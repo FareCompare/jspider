@@ -9,7 +9,7 @@ import net.javacoding.jspider.core.task.SchedulerProvider;
  *
  * $Id: DefaultSchedulerProvider.java,v 1.2 2002/11/27 22:07:37 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class DefaultSchedulerProvider implements SchedulerProvider {
 

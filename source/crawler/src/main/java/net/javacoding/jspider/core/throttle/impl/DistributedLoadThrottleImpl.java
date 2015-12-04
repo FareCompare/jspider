@@ -10,7 +10,7 @@ import net.javacoding.jspider.core.throttle.Throttle;
  *
  * $Id: DistributedLoadThrottleImpl.java,v 1.2 2003/02/27 16:47:50 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class DistributedLoadThrottleImpl implements Throttle {
 

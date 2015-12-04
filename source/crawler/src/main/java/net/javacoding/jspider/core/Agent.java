@@ -14,7 +14,7 @@ import java.net.URL;
  *
  * $Id: Agent.java,v 1.5 2003/03/27 17:44:01 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public interface Agent {
 

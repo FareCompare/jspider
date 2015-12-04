@@ -9,7 +9,7 @@ package net.javacoding.jspider.core.util;
  *
  * $Id: StringUtil.java,v 1.3 2003/05/02 17:36:59 vanrogu Exp $
  *
- * @author Günther Van Roey ( gunther@javacoding.net )
+ * @author Gunther Van Roey ( gunther@javacoding.net )
  */
 public class StringUtil {
 

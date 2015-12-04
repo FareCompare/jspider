@@ -31,7 +31,7 @@ import java.util.Date;
  *
  * $Id: ResourceInternal.java,v 1.13 2003/04/11 16:37:04 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class ResourceInternal implements ParsedResource, ParseErrorResource, ParseIgnoredResource, ForbiddenResource, FetchIgnoredResource, FetchErrorResource {
 

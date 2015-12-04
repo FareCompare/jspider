@@ -21,7 +21,7 @@ import java.sql.Statement;
 /**
  * $Id: JdbcStorageImpl.java,v 1.8 2003/04/11 16:37:06 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  * @todo DAO's need caching - definitely !
  * @todo find a good way of cleaning the store at spidering start or layering it per spider session
  */

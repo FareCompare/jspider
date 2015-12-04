@@ -18,7 +18,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * $Id: RuleFactory.java,v 1.12 2003/04/29 17:53:48 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class RuleFactory {
 

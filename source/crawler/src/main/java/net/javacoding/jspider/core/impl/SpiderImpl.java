@@ -27,7 +27,7 @@ import java.io.InputStreamReader;
  *
  * $Id: SpiderImpl.java,v 1.18 2003/04/02 20:55:06 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class SpiderImpl implements Spider {
 

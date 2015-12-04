@@ -12,7 +12,7 @@ import java.util.ArrayList;
  *
  * $Id: PluginFactory.java,v 1.9 2003/04/22 16:43:34 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class PluginFactory {
 

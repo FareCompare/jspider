@@ -10,7 +10,7 @@ import net.javacoding.jspider.api.model.Resource;
  *
  * $Id: ResourceFetchErrorEvent.java,v 1.5 2003/05/01 08:19:16 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class ResourceFetchErrorEvent extends ResourceRelatedEvent {
 

@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
  *
  * $Id: URLUtil.java,v 1.13 2003/04/29 17:53:49 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class URLUtil {
 

@@ -27,7 +27,7 @@ package net.javacoding.jspider.core.throttle;
  *
  * $Id: Throttle.java,v 1.1 2002/11/20 17:26:09 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface Throttle {
 

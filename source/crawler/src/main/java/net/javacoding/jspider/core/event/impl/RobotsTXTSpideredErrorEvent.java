@@ -13,7 +13,7 @@ import java.net.URLConnection;
  *
  * $Id: RobotsTXTSpideredErrorEvent.java,v 1.3 2003/04/01 19:44:36 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class RobotsTXTSpideredErrorEvent extends URLSpideredErrorEvent {
 

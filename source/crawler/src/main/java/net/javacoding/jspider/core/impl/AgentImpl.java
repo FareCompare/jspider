@@ -29,7 +29,7 @@ import java.util.concurrent.locks.Lock;
  *
  * $Id: AgentImpl.java,v 1.32 2003/04/29 17:53:47 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class AgentImpl implements Agent, CoreEventVisitor {
 

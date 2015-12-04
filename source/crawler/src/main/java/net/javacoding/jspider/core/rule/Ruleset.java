@@ -15,7 +15,7 @@ import java.net.URL;
  *
  * $Id: Ruleset.java,v 1.8 2003/04/03 16:24:53 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface Ruleset {
 

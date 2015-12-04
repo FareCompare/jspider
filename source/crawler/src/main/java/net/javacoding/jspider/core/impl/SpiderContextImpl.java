@@ -39,7 +39,7 @@ import java.util.concurrent.locks.Lock;
  *
  * $Id: SpiderContextImpl.java,v 1.32 2003/04/10 16:19:05 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class SpiderContextImpl implements SpiderContext {
 

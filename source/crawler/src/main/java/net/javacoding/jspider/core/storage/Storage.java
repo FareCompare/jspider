@@ -9,7 +9,7 @@ import net.javacoding.jspider.core.storage.spi.StorageSPI;
  *
  * $Id: Storage.java,v 1.17 2003/04/11 16:37:05 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public interface Storage {
 

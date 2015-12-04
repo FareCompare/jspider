@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  *
  * $Id: SchedulerImpl.java,v 1.17 2003/04/25 21:29:04 vanrogu Exp $
  *
- * @author  G�nther Van Roey
+ * @author  Gunther Van Roey
  */
 public class SchedulerImpl implements Scheduler {
 

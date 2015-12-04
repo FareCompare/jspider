@@ -14,7 +14,7 @@ import java.net.URL;
  *
  * $Id: BaseRuleImpl.java,v 1.10 2003/04/03 16:24:54 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public abstract class BaseRuleImpl implements Rule {
 

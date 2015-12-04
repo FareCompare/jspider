@@ -10,7 +10,7 @@ import java.net.URL;
 /**
  * $Id: BaseURLOnlyRule.java,v 1.2 2003/03/27 17:44:07 vanrogu Exp $
  *
- * @author Günther Van Roey.
+ * @author Gunther Van Roey.
  */
 public class BaseURLOnlyRule extends BaseRuleImpl {
 

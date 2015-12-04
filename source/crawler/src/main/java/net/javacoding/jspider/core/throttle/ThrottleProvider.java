@@ -10,7 +10,7 @@ import net.javacoding.jspider.core.util.config.PropertySet;
  *
  * $Id: ThrottleProvider.java,v 1.2 2002/12/23 17:13:36 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface ThrottleProvider {
 

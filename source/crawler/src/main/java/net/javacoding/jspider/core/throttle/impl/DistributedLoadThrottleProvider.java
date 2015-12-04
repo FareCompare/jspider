@@ -15,7 +15,7 @@ import net.javacoding.jspider.core.logging.Log;
  *
  * $Id: DistributedLoadThrottleProvider.java,v 1.7 2003/04/03 15:57:20 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class DistributedLoadThrottleProvider implements ThrottleProvider {
 

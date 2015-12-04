@@ -9,7 +9,7 @@ import net.javacoding.jspider.api.model.Resource;
  *
  * $Id: ResourceDiscoveredEvent.java,v 1.2 2002/12/24 18:11:38 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class ResourceDiscoveredEvent extends ResourceRelatedEvent {
 

@@ -13,7 +13,7 @@ import net.javacoding.jspider.spi.Plugin;
  *
  * $Id: PluginSocket.java,v 1.9 2003/04/03 16:24:51 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class PluginSocket implements Plugin {
 
