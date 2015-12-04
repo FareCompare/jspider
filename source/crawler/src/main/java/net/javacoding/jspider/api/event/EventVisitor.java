@@ -15,7 +15,7 @@ import net.javacoding.jspider.api.event.site.*;
  *
  * $Id: EventVisitor.java,v 1.6 2003/04/08 15:50:24 vanrogu Exp $
  *
- * @author  Günther Van Roey
+ * @author  Gunther Van Roey
  */
 public interface EventVisitor {
 

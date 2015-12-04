@@ -9,7 +9,7 @@ import net.javacoding.jspider.api.event.EventSink;
  *
  * $Id: Plugin.java,v 1.1 2003/04/03 16:25:22 vanrogu Exp $
  *
- * @author  Günther Van Roey
+ * @author  Gunther Van Roey
  */
 public interface Plugin extends EventSink {
 

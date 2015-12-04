@@ -13,15 +13,24 @@ public class SchedulerMonitorThread extends MonitorThread {
 
     protected Scheduler scheduler;
 
-    public SchedulerMonitorThread ( Scheduler scheduler, EventDispatcher dispatcher, int interval ) {
-        super ( dispatcher, interval, "Job Scheduler");
+    public SchedulerMonitorThread( Scheduler scheduler, EventDispatcher dispatcher, int interval ) {
+        super( dispatcher, interval, "Job Scheduler" );
         this.scheduler = scheduler;
         start();
     }
 
     public MonitorEvent doMonitorTask() {
         //System.out.println(scheduler);
-        return new SchedulerMonitorEvent ( scheduler.getJobCount(), scheduler.getSpiderJobCount(),  scheduler.getThinkerJobCount(), scheduler.getJobsDone(), scheduler.getSpiderJobsDone(),  scheduler.getThinkerJobsDone(), scheduler.getBlockedCount(), scheduler.getAssignedCount() );
+        return new SchedulerMonitorEvent( scheduler.getJobCount(),
+                                          scheduler.getSpiderJobCount(),
+                                          scheduler.getThinkerJobCount(),
+                                          scheduler.getJobsDone(),
+                                          scheduler.getSpiderJobsDone(),
+                                          scheduler.getThinkerJobsDone(),
+                                          scheduler.getBlockedCount(),
+                                          scheduler.getAssignedCount(),
+                                          scheduler.getSpiderQueueSize(),
+                                          scheduler.getThinkerQueueSize() );
     }
 
 }

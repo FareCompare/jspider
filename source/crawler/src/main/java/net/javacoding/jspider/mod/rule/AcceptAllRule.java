@@ -13,7 +13,7 @@ import java.net.URL;
  *
  * $Id: AcceptAllRule.java,v 1.1 2003/04/03 16:10:48 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class AcceptAllRule extends BaseRuleImpl {
 

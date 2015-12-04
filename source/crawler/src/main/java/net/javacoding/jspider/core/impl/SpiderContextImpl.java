@@ -5,6 +5,7 @@ package net.javacoding.jspider.core.impl;
 
 
 import net.javacoding.jspider.Constants;
+import net.javacoding.jspider.core.threading.LockTable;
 import net.javacoding.jspider.spi.Rule;
 import net.javacoding.jspider.api.event.site.UserAgentObeyedEvent;
 import net.javacoding.jspider.api.model.Cookie;
@@ -31,13 +32,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 
 
 /**
  *
  * $Id: SpiderContextImpl.java,v 1.32 2003/04/10 16:19:05 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class SpiderContextImpl implements SpiderContext {
 
@@ -45,7 +47,7 @@ public class SpiderContextImpl implements SpiderContext {
     protected URL baseURL;
     protected EventDispatcher eventDispatcher;
     protected ThrottleFactory throttleFactory;
-    protected Map throttles;
+    protected Map<String, Throttle> throttles;
     protected Map spiderRules;
     protected Map parserRules;
     protected Map robotsTXTRules;
@@ -57,6 +59,7 @@ public class SpiderContextImpl implements SpiderContext {
     protected Ruleset generalSpiderRules;
     protected Ruleset generalParserRules;
     protected String defaultUserAgent;
+    private LockTable lockTable;
     protected Log log;
 
     public SpiderContextImpl(URL baseURL, EventDispatcher eventDispatcher, ThrottleFactory throttleFactory, Storage storage) {
@@ -65,7 +68,7 @@ public class SpiderContextImpl implements SpiderContext {
         this.throttleFactory = throttleFactory;
         this.storage = storage;
         this.cookieUtil = new CookieUtil();
-        this.throttles = new HashMap();
+        this.throttles = new HashMap<>();
         this.spiderRules = new HashMap ( );
         this.parserRules = new HashMap ( );
         this.robotsTXTRules = new HashMap ( );
@@ -74,6 +77,11 @@ public class SpiderContextImpl implements SpiderContext {
         this.log = LogFactory.getLog(SpiderContext.class);
 
         PropertySet props = ConfigurationFactory.getConfiguration().getJSpiderConfiguration();
+
+        PropertySet threadingProps = new MappedPropertySet( ConfigConstants.CONFIG_THREADING, props );
+        int lockCount = threadingProps.getInteger( ConfigConstants.CONFIG_THREADING_LOCKS, 100 );
+        lockTable = new LockTable( lockCount );
+        log.info( "create LockTable with " + lockCount + " locks." );
 
         this.defaultUserAgent = props.getString(ConfigConstants.CONFIG_USERAGENT, Constants.USERAGENT );
         log.info("default user Agent is '" + defaultUserAgent + "'");
@@ -125,13 +133,13 @@ public class SpiderContextImpl implements SpiderContext {
         String cookieString = site.getCookieString();
         boolean useCookies = site.getUseCookies();
         if (useCookies && cookieString != null) {
-            connection.setRequestProperty("Cookie", cookieString);
+            connection.setRequestProperty( "Cookie", cookieString );
         }
     }
 
     public void postHandle(URLConnection connection, Site site) {
-        setCookies(site, cookieUtil.getCookies(connection));
-        storage.getSiteDAO().save(site);
+        setCookies( site, cookieUtil.getCookies( connection ) );
+        storage.getSiteDAO().save( site );
     }
 
     public Agent getAgent() {
@@ -149,7 +157,7 @@ public class SpiderContextImpl implements SpiderContext {
     public void throttle(Site site) {
         Throttle throttle = null;
 
-        throttle = (Throttle) throttles.get(site.getHost());
+        throttle = throttles.get(site.getHost());
         if (throttle == null) {
             throttle = throttleFactory.createThrottle(site);
             throttles.put(site.getHost(), throttle);
@@ -253,7 +261,7 @@ public class SpiderContextImpl implements SpiderContext {
             log.info("site " + sitei.getURL() + " must not be handled.");
         }
 
-        spiderRules.put(site, RuleFactory.createSiteSpiderRules(site));
+        spiderRules.put( site, RuleFactory.createSiteSpiderRules( site ) );
         parserRules.put(site, RuleFactory.createSiteParserRules(site));
     }
 
@@ -263,5 +271,9 @@ public class SpiderContextImpl implements SpiderContext {
 
     public String getUserAgent() {
         return defaultUserAgent;
+    }
+
+    public Lock getLock( URL url ) {
+        return lockTable.getLock( url );
     }
 }

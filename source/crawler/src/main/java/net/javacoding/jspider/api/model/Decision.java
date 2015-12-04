@@ -5,7 +5,7 @@ package net.javacoding.jspider.api.model;
  *
  * $Id: Decision.java,v 1.1 2003/03/09 09:25:22 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface Decision {
 

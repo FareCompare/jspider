@@ -1,5 +1,7 @@
 package net.javacoding.jspider.core.storage.jdbc;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import net.javacoding.jspider.core.logging.Log;
 import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.model.FolderInternal;
@@ -11,21 +13,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * $Id: FolderDAOImpl.java,v 1.2 2003/04/11 16:37:06 vanrogu Exp $
  */
 class FolderDAOImpl implements FolderDAOSPI {
 
-    public static final String ATTRIBUTE_ID = "id";
     public static final int ATTRIBUTE_ID_NDX = 1;
-    public static final String ATTRIBUTE_PARENT = "parent";
     public static final int ATTRIBUTE_PARENT_NDX = 2;
-    public static final String ATTRIBUTE_SITE = "site";
     public static final int ATTRIBUTE_SITE_NDX = 3;
-    public static final String ATTRIBUTE_NAME = "name";
     public static final int ATTRIBUTE_NAME_NDX = 4;
 
     protected Log log;
@@ -33,14 +32,29 @@ class FolderDAOImpl implements FolderDAOSPI {
     protected StorageSPI storage;
     protected DBUtil dbUtil;
 
+    private Cache<Integer, FolderInternal> byId;
+    private Cache<Integer, Set<FolderInternal>> byParent;
+
     public FolderDAOImpl ( StorageSPI storage, DBUtil dbUtil ) {
         this.log = LogFactory.getLog(FolderDAOSPI.class);
         this.storage = storage;
         this.dbUtil = dbUtil;
+        byId = CacheBuilder.newBuilder()
+                        .maximumSize( 100000 )
+                        .expireAfterAccess( 15, TimeUnit.MINUTES )
+                        .recordStats()
+                        .concurrencyLevel( 32 )
+                        .build();
+        byParent = CacheBuilder.newBuilder()
+                        .maximumSize( 100000 )
+                        .expireAfterAccess( 15, TimeUnit.MINUTES )
+                        .recordStats()
+                        .concurrencyLevel( 32 )
+                        .build();
     }
 
     public FolderInternal[] findSiteRootFolders(SiteInternal site) {
-        ArrayList al = new ArrayList ();
+        Set<FolderInternal> rootFolders = new HashSet<>(  );
 
         String sql = "select * from jspider_folder where parent=0 and site=?";
         ResultSet rs = null;
@@ -51,19 +65,25 @@ class FolderDAOImpl implements FolderDAOSPI {
             ps.setInt( 1 , site.getId() );
             rs = ps.executeQuery();
             while ( rs.next() ) {
-                al.add(createFolderFromRecord(rs));
+                rootFolders.add( createFolderFromRecord( rs ) );
             }
         } catch (SQLException e) {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
         }
-        return (FolderInternal[])al.toArray(new FolderInternal[al.size()]);
+        return rootFolders.toArray(new FolderInternal[rootFolders.size()]);
     }
 
     public FolderInternal[] findSubFolders(FolderInternal folder) {
-        ArrayList al = new ArrayList ( );
+        Set<FolderInternal> subFolders = byParent.getIfPresent( folder.getParentId() );
+        if ( subFolders != null ) {
+            synchronized (subFolders) {
+                return subFolders.toArray( new FolderInternal[subFolders.size()] );
+            }
+        }
 
+        subFolders = new HashSet<>( );
         String sql = "select * from jspider_folder where parent=?";
         ResultSet rs = null;
         try (
@@ -73,18 +93,24 @@ class FolderDAOImpl implements FolderDAOSPI {
             ps.setInt( 1, folder.getId() );
             rs = ps.executeQuery();
             while ( rs.next() ) {
-                al.add(createFolderFromRecord(rs));
+                subFolders.add(createFolderFromRecord(rs));
             }
         } catch (SQLException e) {
             log.error("SQLException", e);
         } finally {
             dbUtil.safeClose(rs, log);
         }
-        return (FolderInternal[])al.toArray(new FolderInternal[al.size()]);
+        byParent.put( folder.getParentId(), subFolders );
+        synchronized (subFolders) {
+            return subFolders.toArray(new FolderInternal[subFolders.size()]);
+        }
     }
 
     public FolderInternal findById(int folderId) {
-        FolderInternal folder = null;
+        FolderInternal folder = byId.getIfPresent( folderId );
+        if ( folder != null ) {
+            return folder;
+        }
         String sql = "select * from jspider_folder where id=?";
         ResultSet rs = null;
         try (
@@ -95,6 +121,7 @@ class FolderDAOImpl implements FolderDAOSPI {
             rs = ps.executeQuery();
             if ( rs.next() ) {
                 folder = createFolderFromRecord(rs);
+                byId.put( folderId, folder );
             }
         } catch (SQLException e) {
             log.error("SQLException", e);
@@ -105,16 +132,18 @@ class FolderDAOImpl implements FolderDAOSPI {
     }
 
     public FolderInternal createFolder(int id, FolderInternal parent, String name) {
-        return createFolder ( id, parent.getSiteId(), parent.getId(), name );
+        FolderInternal folder = createFolder( id, parent.getSiteId(), parent.getId(), name );
+        addSubFolder( parent.getId(), folder );
+        return folder;
     }
 
     public FolderInternal createFolder(int id, SiteInternal site, String name) {
-        return createFolder ( id, site.getId(), 0, name );
+        return createFolder( id, site.getId(), 0, name );
     }
 
     public FolderInternal createFolder ( int id, int siteId, int parentId, String name ) {
-        FolderInternal folder = null;
-
+        FolderInternal folder = new FolderInternal( storage, id, parentId, name, siteId );
+        byId.put( id, folder );
         String sql = "insert into jspider_folder ( id, parent, site, name ) values (?,?,?,?)";
 
         try (
@@ -130,8 +159,19 @@ class FolderDAOImpl implements FolderDAOSPI {
         } catch (SQLException e) {
             log.error("SQLException", e);
         }
-        folder = findById(id);
+
         return folder;
+    }
+
+    private void addSubFolder( int parent, FolderInternal folder ) {
+        Set<FolderInternal> subFolders = byParent.getIfPresent( parent );
+        if ( subFolders == null ) {
+            subFolders = new HashSet<>(  );
+            byParent.put( parent, subFolders );
+        }
+        synchronized (subFolders) {
+            subFolders.add( folder );
+        }
     }
 
 

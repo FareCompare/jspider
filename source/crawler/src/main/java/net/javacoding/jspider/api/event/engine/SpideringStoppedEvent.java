@@ -10,7 +10,7 @@ import net.javacoding.jspider.core.storage.Storage;
  *
  * $Id: SpideringStoppedEvent.java,v 1.3 2003/03/28 17:26:25 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class SpideringStoppedEvent extends EngineRelatedEvent {
 
@@ -40,4 +40,7 @@ public class SpideringStoppedEvent extends EngineRelatedEvent {
         return storage.getSiteDAO().findAll ( );
     }
 
+    public Storage getStorage() {
+        return storage;
+    }
 }

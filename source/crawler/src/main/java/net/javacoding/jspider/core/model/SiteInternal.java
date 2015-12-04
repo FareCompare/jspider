@@ -2,6 +2,9 @@ package net.javacoding.jspider.core.model;
 
 import net.javacoding.jspider.api.model.*;
 import net.javacoding.jspider.Constants;
+import net.javacoding.jspider.core.Agent;
+import net.javacoding.jspider.core.logging.Log;
+import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.storage.spi.StorageSPI;
 
 import java.net.URL;
@@ -27,6 +30,7 @@ public class SiteInternal implements Site {
     protected boolean obeyRobotsTXT;
     protected boolean fetchRobotsTXT;
     protected String userAgent;
+    protected Log log = LogFactory.getLog(getClass());
 
     public SiteInternal ( StorageSPI storage, int id, boolean handle, URL url, boolean isBaseSite ) {
         this(storage, id, handle, url, Site.STATE_DISCOVERED,  true, true, true, Constants.USERAGENT, isBaseSite );
@@ -143,18 +147,26 @@ public class SiteInternal implements Site {
 
     public void registerNoRobotsTXTFound ( ) {
         state = Site.STATE_ROBOTSTXT_UNEXISTING;
+        log.info( String.format("site[%s,%s, state=%s-%s",
+                                id, url, state, translateState()) );
     }
 
     public void registerRobotsTXTError() {
         state = Site.STATE_ROBOTSTXT_ERROR;
+        log.info( String.format("site[%s,%s, state=%s-%s",
+                                id, url, state, translateState()) );
     }
 
     public void registerRobotsTXT() {
         this.state = Site.STATE_ROBOTSTXT_HANDLED;
+        log.info( String.format("site[%s,%s, state=%s-%s",
+                                id, url, state, translateState()) );
     }
 
     public void registerRobotsTXTSkipped() {
         this.state = Site.STATE_ROBOTSTXT_SKIPPED;
+        log.info( String.format("site[%s,%s, state=%s-%s",
+                                id, url, state, translateState()) );
     }
 
     public void setUseCookies(boolean useCookies) {

@@ -12,6 +12,7 @@ import net.javacoding.jspider.api.model.*;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * $Id: ResourceDAOImpl.java,v 1.1 2003/04/11 16:37:05 vanrogu Exp $
@@ -23,18 +24,18 @@ class ResourceDAOImpl implements ResourceDAO {
     protected StorageSPI storage;
     protected ResourceDAOSPI spi;
 
-    protected int folderCounter;
+    protected AtomicInteger folderCounter = new AtomicInteger(  );
 
     public ResourceDAOImpl  ( Log log, StorageSPI storage, ResourceDAOSPI spi ) {
         this.log = log;
         this.storage = storage;
         this.spi = spi;
         this.counter = 0;
-        this.folderCounter = 0;
     }
 
     public Resource registerURL(URL url) {
-        FolderInternal folder = ensureFolders(url);
+//        FolderInternal folder = ensureFolders(url);
+        FolderInternal folder = null;
         int id = ++counter;
         ResourceInternal resource = spi.getResource(url);
         if (resource == null) {
@@ -86,10 +87,10 @@ class ResourceDAOImpl implements ResourceDAO {
         return spi.getBySite(si);
     }
 
-    public Resource[] findByFolder(Folder folder) {
-        FolderInternal fi = TypeTranslator.translate(folder);
-        return spi.findByFolder(fi);
-    }
+//    public Resource[] findByFolder(Folder folder) {
+//        FolderInternal fi = TypeTranslator.translate(folder);
+//        return spi.findByFolder(fi);
+//    }
 
     public Resource getResource(URL url) {
         return spi.getResource(url);
@@ -134,7 +135,7 @@ class ResourceDAOImpl implements ResourceDAO {
         if (folderNames.length > 0) {
             folder = (FolderInternal)site.getRootFolder(folderNames[0]);
             if (folder == null) {
-                int id = ++folderCounter;
+                int id = folderCounter.incrementAndGet();
                 folder = storage.getFolderDAO().createFolder(id, site, folderNames[0]);
             }
             if ( folderNames.length > 1 ) {
@@ -147,7 +148,7 @@ class ResourceDAOImpl implements ResourceDAO {
     protected FolderInternal ensureRecursively(FolderInternal folder, String[] folderNames, int depth) {
         FolderInternal subFolder = (FolderInternal)folder.getFolder(folderNames[depth]);
         if (subFolder == null) {
-            int id = ++folderCounter;
+            int id = folderCounter.incrementAndGet();
             subFolder = storage.getFolderDAO().createFolder(id, folder, folderNames[depth]);
         }
         if ((depth + 1) < folderNames.length) {

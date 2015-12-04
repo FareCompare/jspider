@@ -16,7 +16,7 @@ import java.net.URL;
  *
  * $Id: OnlyHttpProtocolRule.java,v 1.1 2003/04/03 16:10:52 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class OnlyHttpProtocolRule extends BaseRuleImpl {
 

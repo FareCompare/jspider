@@ -14,19 +14,19 @@ import java.net.URL;
  */
 public class OnlyDeeperInSiteRule extends BaseRuleImpl {
 
-    public Decision apply(SpiderContext context, Site currentSite, URL url) {
+    public Decision apply( SpiderContext context, Site currentSite, URL url ) {
 
-        Decision decision = new DecisionInternal ( Decision.RULE_FORBIDDEN, "url not deeper in site that baseURL" );
+        Decision decision = new DecisionInternal( Decision.RULE_FORBIDDEN, "url not deeper in site that baseURL" );
 
         URL baseURL = context.getBaseURL();
 
-        String baseUrlPath = URLUtil.stripResource ( context.getBaseURL().getPath() );
-        String urlPath = URLUtil.stripResource ( url.getPath() );
+        String baseUrlPath = URLUtil.stripResource( context.getBaseURL().getPath() );
+        String urlPath = URLUtil.stripResource( url.getPath() );
 
-        if ( url.getProtocol().equals(baseURL.getProtocol())) {
-            if (url.getPort() == baseURL.getPort()) {
-                if ( urlPath.startsWith(baseUrlPath )) {
-                  decision = new DecisionInternal(Decision.RULE_ACCEPT);
+        if ( url.getProtocol().equals( baseURL.getProtocol() ) ) {
+            if ( url.getPort() == baseURL.getPort() ) {
+                if ( urlPath.startsWith( baseUrlPath ) ) {
+                    decision = new DecisionInternal( Decision.RULE_ACCEPT );
                 }
             }
         }

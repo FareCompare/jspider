@@ -13,7 +13,7 @@ import java.net.URLConnection;
  *
  * $Id: RobotsTXTUnexistingEvent.java,v 1.3 2003/04/01 19:44:37 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class RobotsTXTUnexistingEvent extends URLSpideredErrorEvent {
 

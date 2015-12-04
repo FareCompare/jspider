@@ -11,7 +11,7 @@ import java.net.URL;
  *
  * $Id: URLRelatedBaseEventImpl.java,v 1.2 2003/02/06 17:22:24 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class URLRelatedBaseEventImpl extends BaseCoreEventImpl {
 

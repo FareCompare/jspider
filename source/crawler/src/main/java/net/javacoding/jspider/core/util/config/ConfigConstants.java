@@ -16,6 +16,7 @@ public interface ConfigConstants {
     public static final String CONFIG_THREADING_MONITORING_ENABLED = "enabled";
     public static final String CONFIG_THREADING_MONITORING_INTERVAL = "interval";
     public static final String CONFIG_THREADING_COUNT = "count";
+    public static final String CONFIG_THREADING_LOCKS = "locks";
 
     public static final String CONFIG_PROXY_USE = "use";
     public static final String CONFIG_PROXY_HOST = "host";

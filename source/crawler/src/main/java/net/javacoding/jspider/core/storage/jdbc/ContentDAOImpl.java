@@ -1,5 +1,7 @@
 package net.javacoding.jspider.core.storage.jdbc;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import net.javacoding.jspider.core.logging.Log;
 import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.storage.spi.ContentDAOSPI;
@@ -12,8 +14,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -24,16 +25,20 @@ class ContentDAOImpl implements ContentDAOSPI {
     protected Log log;
     protected DBUtil dbUtil;
     protected StorageSPI storage;
-    /**
-     * Use as cache.
-     */
-    protected Map<Integer, byte[]> contents;
+    /** Use as cache. */
+    protected Cache<Integer, byte[]> contents;
 
     public ContentDAOImpl( StorageSPI storage, DBUtil dbUtil ) {
-        this.log = LogFactory.getLog( ContentDAOSPI.class );
+        this.log = LogFactory.getLog( this.getClass() );
         this.dbUtil = dbUtil;
         this.storage = storage;
-        this.contents = new ConcurrentHashMap<>();
+        this.contents = CacheBuilder.newBuilder()
+                .maximumSize( 50000 )
+                .expireAfterAccess( 15, TimeUnit.MINUTES )
+                .recordStats()
+                .concurrencyLevel( 32 )
+                .build();
+
     }
 
     private void setBytesInCache( int id, byte[] bytes ) {
@@ -57,12 +62,12 @@ class ContentDAOImpl implements ContentDAOSPI {
             ps.execute();
         }
         catch ( Exception e ) {
-            log.error( "Failed to insert content into table. " + bytes.length + " bytes long", e );
+            log.error( "Failed to insert content id=" + id + " into table. " + bytes.length + " bytes long", e );
         }
     }
 
     private InputStream getInputStreamFromCache( int id ) {
-        byte[] bytes = contents.get( id );
+        byte[] bytes = contents.getIfPresent( id );
         if ( bytes != null ) {
             return new ByteArrayInputStream( bytes );
         }
@@ -92,7 +97,7 @@ class ContentDAOImpl implements ContentDAOSPI {
             }
         }
         catch ( Exception e ) {
-            log.error( "Failed to read content from table", e );
+            log.error( "Failed to read content from table, id=" + id, e );
         }
         finally {
             dbUtil.safeClose( rs, log );

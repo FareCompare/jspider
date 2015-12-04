@@ -19,7 +19,7 @@ import java.net.URL;
  *
  * $Id: DecideOnSpideringTask.java,v 1.21 2003/04/10 16:19:13 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class DecideOnSpideringTask extends BaseWorkerTaskImpl {
 
@@ -37,7 +37,7 @@ public class DecideOnSpideringTask extends BaseWorkerTaskImpl {
     public void prepare() {
     }
 
-    public synchronized void execute() {
+    public void execute() {
         URL url = event.getURL();
         URL foundURL = event.getFoundURL();
 

@@ -9,7 +9,7 @@ import net.javacoding.jspider.spi.EventFilter;
  *
  * $Id: NonErrorsOnlyEventFilter.java,v 1.1 2003/04/07 15:50:53 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class NonErrorsOnlyEventFilter implements EventFilter {
 

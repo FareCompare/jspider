@@ -12,7 +12,7 @@ import java.net.URL;
  *
  * $Id: JSpider.java,v 1.27 2003/04/10 16:19:03 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  * @todo support commandline input for proxy password
  * @todo implement Swing-based monitor UI ( threading, progress, ...)
  */

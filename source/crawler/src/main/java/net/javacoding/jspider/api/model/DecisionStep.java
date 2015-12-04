@@ -7,7 +7,7 @@ package net.javacoding.jspider.api.model;
  *
  * $Id: DecisionStep.java,v 1.2 2003/04/04 20:06:02 vanrogu Exp $
  *
- * @author Günther Van Roey.
+ * @author Gunther Van Roey.
  */
 public interface DecisionStep {
 

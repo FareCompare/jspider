@@ -12,7 +12,7 @@ import java.net.URL;
  *
  * $Id: BaseCoreEventImpl.java,v 1.3 2003/02/28 17:39:03 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public abstract class BaseCoreEventImpl implements CoreEvent {
 

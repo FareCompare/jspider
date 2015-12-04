@@ -9,7 +9,7 @@ import net.javacoding.jspider.core.util.config.*;
  *
  * $Id: SpiderNest.java,v 1.6 2003/04/02 20:54:59 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class SpiderNest {
 

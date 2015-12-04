@@ -15,13 +15,13 @@ import net.javacoding.jspider.core.logging.Log;
  *
  * $Id: DistributedLoadThrottleProvider.java,v 1.7 2003/04/03 15:57:20 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class DistributedLoadThrottleProvider implements ThrottleProvider {
 
     public static final String INTERVAL = "interval";
     public static final int INTERVAL_DEFAULT = 1000;
-    public static final int INTERVAL_MIN = 50;
+    public static final int INTERVAL_MIN = 10;
 
     /**
      * Method that instantiates the Throttle implementation.

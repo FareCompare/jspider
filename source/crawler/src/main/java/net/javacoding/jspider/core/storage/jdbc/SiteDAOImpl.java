@@ -14,6 +14,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * $Id: SiteDAOImpl.java,v 1.8 2003/04/11 16:37:06 vanrogu Exp $
@@ -23,6 +25,11 @@ class SiteDAOImpl implements SiteDAOSPI {
     protected StorageSPI storage;
     protected Log log;
 
+    /** Site cache. */
+    protected Map<URL, SiteInternal> knownURLs = new ConcurrentHashMap<>(  );
+    protected Map<Integer, SiteInternal> byId = new ConcurrentHashMap<>(  );
+
+
     public SiteDAOImpl( StorageSPI storage, DBUtil dbUtil ) {
         this.storage = storage;
         this.dbUtil = dbUtil;
@@ -30,6 +37,11 @@ class SiteDAOImpl implements SiteDAOSPI {
     }
 
     public SiteInternal find( URL siteURL ) {
+        SiteInternal site;
+        site = knownURLs.get( siteURL );
+        if ( site != null ) {
+            return site;
+        }
         String sql = "select id, host, port, useCookies, useProxy, state, obeyRobotsTxt, baseSite, userAgent, handle\n" +
                      "  from jspider_site\n" +
                      "  where host = ?\n" +
@@ -47,7 +59,9 @@ class SiteDAOImpl implements SiteDAOSPI {
             rs = preparedStatement.executeQuery();
 
             if ( rs.next() ) {
-                return createSiteFromRecord( rs );
+                site = createSiteFromRecord( rs );
+                knownURLs.put( siteURL, site );
+                return site;
             }
         }
         catch ( SQLException e ) {
@@ -61,6 +75,12 @@ class SiteDAOImpl implements SiteDAOSPI {
     }
 
     public SiteInternal find( int id ) {
+        SiteInternal site;
+        site = byId.get( id );
+        if ( site != null ) {
+            return site;
+        }
+
         String sql = "select id, host, port, useCookies, useProxy, state, obeyRobotsTxt, baseSite, userAgent, handle\n" +
                      "  from jspider_site\n" +
                      "  where id = ?";
@@ -76,7 +96,9 @@ class SiteDAOImpl implements SiteDAOSPI {
             rs = preparedStatement.executeQuery();
 
             if ( rs.next() ) {
-                return createSiteFromRecord( rs );
+                site = createSiteFromRecord( rs );
+                byId.put( id, site );
+                return site;
             }
         }
         catch ( SQLException e ) {
@@ -115,6 +137,8 @@ class SiteDAOImpl implements SiteDAOSPI {
         catch ( SQLException e ) {
             log.error( "SQLException", e );
         }
+        knownURLs.put(  site.getURL(), site );
+        byId.put( id, site );
     }
 
     public void save( int id, SiteInternal site ) {
@@ -125,7 +149,7 @@ class SiteDAOImpl implements SiteDAOSPI {
                      "    obeyRobotsTxt = ?,\n" +
                      "    baseSite = ?,\n" +
                      "    userAgent = ?,\n" +
-                     "    handle = ?,\n" +
+                     "    handle = ?\n" +
                      "  where id = ?";
 
         try (
@@ -141,12 +165,14 @@ class SiteDAOImpl implements SiteDAOSPI {
             preparedStatement.setBoolean( ++index, site.isBaseSite() );
             preparedStatement.setString( ++index, site.getUserAgent() );
             preparedStatement.setBoolean( ++index, site.mustHandle() );
+            preparedStatement.setInt( ++index, site.getId() );
 
             preparedStatement.executeUpdate();
         }
         catch ( SQLException e ) {
             log.error( "SQLException", e );
         }
+        byId.put( id, site );
     }
 
     public SiteInternal[] findAll() {

@@ -9,7 +9,7 @@ import net.javacoding.jspider.api.model.Site;
  *
  * $Id: RobotsTXTMissingEvent.java,v 1.3 2003/03/28 17:26:26 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class RobotsTXTMissingEvent extends SiteRelatedEvent {
 

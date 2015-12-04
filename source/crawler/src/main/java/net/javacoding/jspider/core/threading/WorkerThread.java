@@ -12,7 +12,7 @@ import net.javacoding.jspider.core.task.WorkerTask;
  *
  * $Id: WorkerThread.java,v 1.11 2003/04/02 20:55:26 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 class WorkerThread extends Thread {
 

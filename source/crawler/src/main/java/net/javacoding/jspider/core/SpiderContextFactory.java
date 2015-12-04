@@ -17,7 +17,7 @@ import java.net.URL;
  *
  * $Id: SpiderContextFactory.java,v 1.12 2003/04/03 15:57:14 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class SpiderContextFactory {
 

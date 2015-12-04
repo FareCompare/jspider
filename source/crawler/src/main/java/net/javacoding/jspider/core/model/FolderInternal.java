@@ -33,6 +33,10 @@ public class FolderInternal implements Folder {
         return site;
     }
 
+    public int getParentId() {
+        return parent;
+    }
+
     public void setId(int id) {
         this.id = id;
     }

@@ -9,7 +9,7 @@ import net.javacoding.jspider.core.logging.LogProvider;
  *
  * $Id: DevNullLogProvider.java,v 1.3 2003/03/27 17:44:05 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class DevNullLogProvider implements LogProvider {
 

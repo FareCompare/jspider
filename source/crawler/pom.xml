@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>net.javacoding.jspider</groupId>
 		<artifactId>jspider</artifactId>
-		<version>0.0.1</version>
+		<version>0.1</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -35,6 +35,10 @@
             <groupId>c3p0</groupId>
             <artifactId>c3p0</artifactId>
         </dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -70,6 +74,29 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-assembly-plugin</artifactId>
+       <configuration>
+           <descriptors>
+               <descriptor>src/main/assembly/assembly.xml</descriptor>
+           </descriptors>
+           <archive>
+               <manifest>
+                   <mainClass>net.javacoding.jspider.JSpider</mainClass>
+               </manifest>
+           </archive>
+       </configuration>
+       <executions>
+           <execution>
+               <id>make-assembly</id>
+               <phase>package</phase>
+               <goals>
+                   <goal>single</goal>
+               </goals>
+           </execution>
+       </executions>
+   </plugin>
 
 		</plugins>
 	</build>

@@ -1,5 +1,6 @@
 package net.javacoding.jspider.core.util.html;
 
+import net.javacoding.jspider.core.util.statistics.StopWatch;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -18,19 +19,41 @@ public class TestURLFinder {
 
     private InputStream inputStream;
     private URL url;
+    private int foundCount;
 
     @Before
     public void setup() throws Exception {
 //        inputStream = getClass().getClassLoader().getResourceAsStream( "sobre.html" );
 //        url = new URL( "http://www.farecompare.mx//sobre.html" );
-        inputStream = getClass().getClassLoader().getResourceAsStream( "NYC-BOS-market.html" );
-        url = new URL( "http://www.farecompare.com/flights/New_York-NYC/Boston-BOS/market.html" );
+
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "NYC-BOS-market.html" );
+//        url = new URL( "http://www.farecompare.com/flights/New_York-NYC/Boston-BOS/market.html" );
+
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "LON-city.html" );
+//        url = new URL( "http://www.farecompare.mx/vuelos/Londres-LON/city.html" );
+
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "es-BOS.city.html" );
+//        url = new URL( "http://alpha.farecompare.com/es/vuelos/Boston-BOS/city.html" );
+
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "USMA-state.html" );
+//        url = new URL( "http://alpha.farecompare.com/es/vuelos/Massachusetts-USMA/state.html" );
+
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "es-BOG.city.html" );
+//        url = new URL( "http://alpha.farecompare.com/es/vuelos/Bogot%C3%A1-BOG/city.html" );
+
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "es-index.html" );
+//        url = new URL( "http://alpha.farecompare.com/es/index.html" );
+
+        inputStream = getClass().getClassLoader().getResourceAsStream( "es-home.html" );
+        url = new URL( "http://stg.farecompare.com/es/" );
     }
 
     @Test
     public void testFindUrls() throws Exception {
+        StopWatch timer = new StopWatch( true );
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         String line;
+        int lines = 0;
         while ( (line = br.readLine()) != null ) {
             URLFinder.findURLs(new URLFinderCallback() {
 
@@ -52,6 +75,7 @@ public class TestURLFinder {
                 @Override
                 public void urlFound( URL foundURL ) {
                     System.out.println( "urlFound: " + foundURL );
+                    foundCount++;
                 }
 
                 @Override
@@ -60,6 +84,6 @@ public class TestURLFinder {
                 }
             }, line);
         }
-
+        System.out.printf("Found %,d URLs, duration %s%n", foundCount, timer );
     }
 }

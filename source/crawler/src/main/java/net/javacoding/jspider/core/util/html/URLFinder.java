@@ -15,20 +15,21 @@ public class URLFinder {
 
     public static final String[] patterns = {
       "href=",
+      "href = ",
       "src=",
       "background="
     };
 
     public static void findURLs(URLFinderCallback callback, String line) {
-        findBase(callback, line, basePattern);
+        String lineLowerCase = line.toLowerCase();
+        findBase(callback, line, lineLowerCase, basePattern);
         for (int i = 0; i < patterns.length; i++) {
             String pattern = patterns[i];
-            findURLs(callback, line, pattern);
+            findURLs(callback, line, lineLowerCase, pattern);
         }
     }
 
-    protected static void findBase(URLFinderCallback callback, String line, String pattern) {
-        String lineLowerCase = line.toLowerCase();
+    private static void findBase(URLFinderCallback callback, String line, String lineLowerCase, String pattern) {
         int pos = lineLowerCase.indexOf(pattern);
         if ( pos != -1 ) {
             String url = "";
@@ -42,24 +43,26 @@ public class URLFinder {
         }
     }
 
-    protected static void findURLs(URLFinderCallback callback, String line, String pattern) {
-        String lineLowerCase = line.toLowerCase();
+    private static void findURLs(URLFinderCallback callback, String line, String lineLowerCase, String pattern) {
         int pos = lineLowerCase.indexOf(pattern);
         while (pos != -1) {
-            String uri = "";
-            try {
-                uri = extractURL(line, pos + pattern.length());
-                if ( !"javascript:".equals( uri ) ) {
-                    URL baseURL = callback.getContextURL();
-                    if ( ! URLUtil.isFileSpecified(baseURL)) {
-                        // Force a slash in case of a folder (to avoid buggy relative refs)
-                        baseURL = new URL(baseURL.toString() + "/");
+            // don't parse if statement like r.href=e+n+t
+            if ( pos > 0 && lineLowerCase.charAt( pos-1 ) != '.') {
+                String uri = "";
+                try {
+                    uri = extractURL( line, pos + pattern.length() );
+                    if ( !"javascript:".equals( uri ) ) {
+                        URL baseURL = callback.getContextURL();
+                        if ( !URLUtil.isFileSpecified( baseURL ) ) {
+                            // Force a slash in case of a folder (to avoid buggy relative refs)
+                            baseURL = new URL( baseURL.toString() + "/" );
+                        }
+                        URL foundURL = URLUtil.normalize( new URL( baseURL, uri ) );
+                        callback.urlFound( foundURL );
                     }
-                    URL foundURL = URLUtil.normalize(new URL(baseURL, uri));
-                    callback.urlFound(foundURL);
+                } catch ( MalformedURLException e ) {
+                    callback.malformedUrlFound( uri );
                 }
-            } catch (MalformedURLException e) {
-                callback.malformedUrlFound(uri);
             }
             pos = lineLowerCase.indexOf(pattern, pos + pattern.length());
         }
@@ -75,8 +78,10 @@ public class URLFinder {
             string = string.substring(pos + 1);
             tokens = " \'>";
         } else if ( c == '"') {
-            string = string.substring(pos + 1);
+            string = string.substring( pos + 1 );
             tokens = " \">";
+        } else if ( c == '\\' ) {
+            string = string.substring( pos + 1 );
         } else {
             string = string.substring(pos);
         }

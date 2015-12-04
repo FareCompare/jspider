@@ -46,11 +46,24 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
     -- counts by httpstatus
     SELECT httpstatus, COUNT(*) FROM jspider_resource GROUP BY 1 UNION SELECT 'TOTAL', COUNT(*) FROM jspider_resource;
 
+    -- show non 200 urls
+    SELECT 'id', 'url', 'httpstatus'
+    UNION (
+    SELECT r1.id, r1.url, r1.httpstatus
+      INTO OUTFILE '/usr/local/jspider/output/non_200_resouces_D150515_02.csv'
+           FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+           LINES TERMINATED BY '\n'
+      FROM jspider_resource r1
+     WHERE r1.httpstatus <> 0
+       AND r1.httpstatus <> 200
+     ORDER BY 1
+    );
+
     -- show non 200 urls and their referer
     SELECT 'id', 'url', 'httpstatus', 'id', 'referer'
     UNION (
     SELECT r1.id, r1.url, r1.httpstatus, r2.id, r2.url as referer
-      INTO OUTFILE '/usr/local/jspider/output/non_200_report.csv'
+      INTO OUTFILE '/usr/local/jspider/output/non_200_report_D150515_02.csv'
            FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
            LINES TERMINATED BY '\n'
       FROM jspider_resource r1, jspider_resource r2, jspider_resource_reference x
@@ -58,11 +71,34 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
        AND r2.id = referer
        AND r1.httpstatus <> 0
        AND r1.httpstatus <> 200
-       AND r1.url like 'http://www.farecompare.com/flights/%'
+       -- AND r1.url like 'http://www.farecompare.com/flights/%'
+       AND r1.url like 'http://alpha.farecompare.com/es/vuelos/%'
      ORDER BY 1
      );
 
-    -- This query will show what url in the url_validation table were not crawled. - Farecompare only
+    --
+    -- Show not crawled
+    -- These queries will show what urls in the url_validation table were not crawled. - Farecompare only
+    --
+
+    -- Site Code 1 - old
+    SELECT COUNT(*) FROM (
+    SELECT uri FROM seo_ml.url_validation WHERE siteCode = 1 AND returnCode = 200 AND uri NOT IN(
+           SELECT SUBSTR(url from length('http://www.farecompare.com/')) as part
+             FROM seo_spider.jspider_resource WHERE url LIKE 'http://www.farecompare.com/%' )
+             ) t;
+
+    -- Site Code 2
+    SELECT * FROM (
+    SELECT uri FROM seo_ml.url_validation WHERE siteCode = 2 AND returnCode = 200 AND uri NOT IN(
+           SELECT SUBSTR(url from length('http://stg.farecompare.com/es/')) as part
+             FROM seo_spider.jspider_resource WHERE url LIKE 'http://stg.farecompare.com/es%' )
+             ) t
+    INTO OUTFILE '/usr/local/jspider/output/not_crawled_report_D151106_01.csv'
+               FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
+               LINES TERMINATED BY '\n';
+
+    -- Site Code 4
     SELECT COUNT(*) FROM (
     SELECT uri FROM seo_ml.url_validation WHERE siteCode = 4 AND returnCode = 200 AND uri NOT IN(
            SELECT SUBSTR(url from length('http://www.farecompare.mx/')) as part

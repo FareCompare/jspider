@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
  *
  * $Id: URLUtil.java,v 1.13 2003/04/29 17:53:49 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class URLUtil {
 
@@ -137,8 +137,12 @@ public class URLUtil {
     public static String stripResource(String path) {
         String result = null;
         if (path != null) {
-            int pos = path.lastIndexOf("/");
-            result = path.substring(0, pos + 1);
+            if ( path.indexOf( '.' ) != -1 ) {
+                int pos = path.lastIndexOf("/");
+                result = path.substring(0, pos + 1);
+            } else {
+                result = path;
+            }
         }
         return result;
     }

@@ -9,7 +9,7 @@ import net.javacoding.jspider.api.model.Folder;
  *
  * $Id: FolderDiscoveredEvent.java,v 1.2 2003/03/28 17:26:25 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class FolderDiscoveredEvent extends FolderRelatedEvent {
 

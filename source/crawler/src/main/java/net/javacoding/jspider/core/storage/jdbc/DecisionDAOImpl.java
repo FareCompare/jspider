@@ -42,9 +42,10 @@ class DecisionDAOImpl implements DecisionDAOSPI {
         try (
                 Connection connection = dbUtil.getConnection();
                 PreparedStatement ps = connection.prepareStatement(
-                        "insert into jspider_decision ( resource, subject, type, comment ) values (?,?,?,?)" );
+                        "INSERT INTO jspider_decision ( resource, subject, type, comment ) VALUES (?,?,?,?)" +
+                        "       ON DUPLICATE KEY UPDATE type = VALUES(type), comment = VALUES(comment)" );
                 PreparedStatement ps2 = connection.prepareStatement(
-                        "insert into jspider_decision_step ( resource, subject, sequence, type, rule, decision, comment ) values (?,?,?,?,?,?,?)" )
+                        "INSERT INTO jspider_decision_step ( resource, subject, sequence, type, rule, decision, comment ) VALUES (?,?,?,?,?,?,?)" )
 
         ) {
             ps.setInt( 1, resource.getId() );
@@ -89,8 +90,8 @@ class DecisionDAOImpl implements DecisionDAOSPI {
                      "    left join jspider_decision_step s\n" +
                      "      on d.resource = s.resource\n" +
                      "        and d.subject = s.subject\n" +
-                     "  where d.resource = 1\n" +
-                     "    and d.subject = 2\n" +
+                     "  where d.resource = ?\n" +
+                     "    and d.subject = ?\n" +
                      "  order by s.sequence";
 
         DecisionInternal decision = null;

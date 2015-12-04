@@ -10,7 +10,7 @@ import java.net.URL;
  *
  * $Id: CoreEventVisitor.java,v 1.3 2003/02/13 20:12:53 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface CoreEventVisitor {
 

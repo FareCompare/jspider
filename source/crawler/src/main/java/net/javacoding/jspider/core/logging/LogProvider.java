@@ -5,7 +5,7 @@ package net.javacoding.jspider.core.logging;
  *
  * $Id: LogProvider.java,v 1.2 2003/03/27 17:44:03 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface LogProvider {
 

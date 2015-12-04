@@ -11,7 +11,7 @@ import java.util.Date;
  *
  * $Id: JSpiderEvent.java,v 1.5 2003/03/23 15:44:48 vanrogu Exp $
  *
- * @author  Günther Van Roey
+ * @author  Gunther Van Roey
  */
 public abstract class JSpiderEvent implements EventVisitable {
 

@@ -8,7 +8,7 @@ import java.net.URL;
  *
  * $Id: Site.java,v 1.23 2003/04/10 16:19:03 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface Site {
 

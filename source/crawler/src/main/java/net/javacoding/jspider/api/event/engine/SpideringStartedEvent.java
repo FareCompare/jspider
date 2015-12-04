@@ -10,7 +10,7 @@ import java.net.URL;
  *
  * $Id: SpideringStartedEvent.java,v 1.2 2002/12/20 22:22:31 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class SpideringStartedEvent extends EngineRelatedEvent {
 

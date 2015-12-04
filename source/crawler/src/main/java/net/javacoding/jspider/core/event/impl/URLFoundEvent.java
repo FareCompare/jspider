@@ -12,7 +12,7 @@ import java.net.URL;
  *
  * $Id: URLFoundEvent.java,v 1.5 2003/04/09 17:08:04 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class URLFoundEvent extends BaseCoreEventImpl {
 

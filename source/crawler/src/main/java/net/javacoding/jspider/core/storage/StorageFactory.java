@@ -12,7 +12,7 @@ import net.javacoding.jspider.core.util.config.*;
  *
  * $Id: StorageFactory.java,v 1.7 2003/04/11 16:37:05 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class StorageFactory {
 

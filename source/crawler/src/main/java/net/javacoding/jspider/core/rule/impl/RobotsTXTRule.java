@@ -23,7 +23,7 @@ import java.net.URL;
  *
  * $Id: RobotsTXTRule.java,v 1.13 2003/03/28 17:26:28 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class RobotsTXTRule extends BaseRuleImpl {
 

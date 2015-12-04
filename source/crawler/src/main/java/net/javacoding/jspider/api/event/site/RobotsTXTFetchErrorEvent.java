@@ -10,7 +10,7 @@ import net.javacoding.jspider.api.model.Site;
  *
  * $Id: RobotsTXTFetchErrorEvent.java,v 1.5 2003/03/28 17:26:26 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class RobotsTXTFetchErrorEvent extends SiteRelatedEvent {
 
