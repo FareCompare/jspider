@@ -24,7 +24,7 @@ import net.javacoding.jspider.api.event.JSpiderEvent;
  *
  * $Id: EventFilter.java,v 1.1.1.1 2002/11/20 17:02:32 vanrogu Exp $
  *
- * @author Günther Van Roey (gunther@javacoding.net)
+ * @author Gunther Van Roey (gunther@javacoding.net)
  * @version $Revision: 1.1.1.1 $ $Date: 2002/11/20 17:02:32 $ $Name:  $
  */
 public interface EventFilter {

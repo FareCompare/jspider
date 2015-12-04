@@ -14,7 +14,7 @@ import java.net.URL;
  *
  * $Id: BaseWorkerTaskImpl.java,v 1.4 2003/04/10 16:19:08 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public abstract class BaseWorkerTaskImpl implements WorkerTask {
 

@@ -10,7 +10,7 @@ import net.javacoding.jspider.api.model.Resource;
  *
  * $Id: ResourceParsedEvent.java,v 1.2 2003/04/08 15:50:25 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class ResourceParsedEvent extends ResourceRelatedEvent {
 

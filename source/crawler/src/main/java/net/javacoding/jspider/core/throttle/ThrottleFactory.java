@@ -21,7 +21,7 @@ import net.javacoding.jspider.core.util.config.*;
  *
  * $Id: ThrottleFactory.java,v 1.9 2003/04/03 15:57:19 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class ThrottleFactory {
 

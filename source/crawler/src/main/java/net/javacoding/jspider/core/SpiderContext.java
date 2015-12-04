@@ -18,7 +18,7 @@ import java.util.concurrent.locks.Lock;
  *
  * $Id: SpiderContext.java,v 1.17 2003/04/29 17:53:47 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public interface SpiderContext {
 

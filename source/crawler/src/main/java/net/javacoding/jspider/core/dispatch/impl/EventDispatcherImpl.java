@@ -16,7 +16,7 @@ import net.javacoding.jspider.mod.eventfilter.AllowAllEventFilter;
  *
  * $Id: EventDispatcherImpl.java,v 1.11 2003/04/22 16:43:33 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class EventDispatcherImpl implements EventDispatcher {
 

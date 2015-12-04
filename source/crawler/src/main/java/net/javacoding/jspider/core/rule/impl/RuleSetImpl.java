@@ -16,7 +16,7 @@ import java.util.List;
  *
  * $Id: RuleSetImpl.java,v 1.9 2003/04/03 16:24:59 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class RuleSetImpl implements Ruleset {
 

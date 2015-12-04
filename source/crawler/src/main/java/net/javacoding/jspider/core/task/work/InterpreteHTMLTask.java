@@ -21,7 +21,7 @@ import java.net.URL;
  *
  * $Id: InterpreteHTMLTask.java,v 1.15 2003/04/10 16:19:14 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class InterpreteHTMLTask extends BaseWorkerTaskImpl implements URLFinderCallback {
 

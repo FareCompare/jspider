@@ -12,7 +12,7 @@ import java.util.StringTokenizer;
  *
  * $Id: CookieUtil.java,v 1.8 2003/04/08 18:44:15 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class CookieUtil {
 

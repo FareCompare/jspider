@@ -13,7 +13,7 @@ import java.net.URLConnection;
  *
  * $$
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class RobotsTXTSpideredOkEvent extends URLSpideredOkEvent {
 

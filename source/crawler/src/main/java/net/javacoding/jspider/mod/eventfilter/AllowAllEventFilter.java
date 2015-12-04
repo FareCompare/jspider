@@ -7,7 +7,7 @@ import net.javacoding.jspider.spi.EventFilter;
  *
  * $Id: AllowAllEventFilter.java,v 1.2 2003/04/03 16:25:03 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class AllowAllEventFilter implements EventFilter {
 

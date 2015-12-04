@@ -8,7 +8,7 @@ import net.javacoding.jspider.core.logging.Log;
  *
  * $Id: DevNullLogImpl.java,v 1.2 2003/03/27 17:44:05 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class DevNullLogImpl implements Log {
 

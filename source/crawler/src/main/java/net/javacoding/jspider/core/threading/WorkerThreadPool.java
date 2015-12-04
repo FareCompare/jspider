@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  *
  * $Id: WorkerThreadPool.java,v 1.7 2003/02/27 16:47:49 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class WorkerThreadPool extends ThreadGroup {
 

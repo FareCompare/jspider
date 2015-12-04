@@ -14,7 +14,7 @@ import java.net.URL;
  *
  * $Id: Scheduler.java,v 1.10 2003/04/25 21:28:59 vanrogu Exp $
  *
- * @author  G�nther Van Roey
+ * @author  Gunther Van Roey
  */
 public interface Scheduler {
 

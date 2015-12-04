@@ -31,7 +31,7 @@ import java.util.concurrent.locks.Lock;
  *
  * $Id: SpiderHttpURLTask.java,v 1.19 2003/04/10 16:19:14 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
 

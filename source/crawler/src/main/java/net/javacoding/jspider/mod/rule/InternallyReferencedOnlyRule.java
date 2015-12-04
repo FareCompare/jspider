@@ -16,7 +16,7 @@ import java.net.URL;
  *
  * $Id: InternallyReferencedOnlyRule.java,v 1.2 2003/04/25 21:29:06 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class InternallyReferencedOnlyRule extends BaseRuleImpl {
 

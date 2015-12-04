@@ -10,7 +10,7 @@ import net.javacoding.jspider.api.model.Folder;
  *
  * $Id: FolderRelatedEvent.java,v 1.2 2003/04/07 15:50:46 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public abstract class FolderRelatedEvent extends JSpiderEvent {
 

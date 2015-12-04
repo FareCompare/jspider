@@ -11,7 +11,7 @@ import net.javacoding.jspider.core.logging.LogFactory;
  *
  * $Id: ConsolePlugin.java,v 1.5 2003/04/02 20:55:35 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class ConsolePlugin extends FlatOutputPlugin {
 

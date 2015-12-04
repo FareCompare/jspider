@@ -8,7 +8,7 @@ import java.io.InputStream;
  *
  * $Id: FetchedResource.java,v 1.4 2003/04/01 19:44:36 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface FetchedResource extends FetchTriedResource {
 

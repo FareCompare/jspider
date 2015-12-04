@@ -19,7 +19,7 @@ import java.net.URL;
  *
  * $Id: DecideOnSpideringTask.java,v 1.21 2003/04/10 16:19:13 vanrogu Exp $
  *
- * @author G�nther Van Roey
+ * @author Gunther Van Roey
  */
 public class DecideOnSpideringTask extends BaseWorkerTaskImpl {
 

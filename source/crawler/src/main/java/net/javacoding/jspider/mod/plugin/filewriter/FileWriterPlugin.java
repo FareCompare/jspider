@@ -14,7 +14,7 @@ import java.util.Date;
  *
  * $Id: FileWriterPlugin.java,v 1.7 2003/04/02 20:55:37 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class FileWriterPlugin extends FlatOutputPlugin {
 

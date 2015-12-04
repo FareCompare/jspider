@@ -20,7 +20,7 @@ import java.util.*;
  *
  * $Id: VelocityPlugin.java,v 1.7 2003/04/09 17:08:14 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class VelocityPlugin implements Plugin {
 

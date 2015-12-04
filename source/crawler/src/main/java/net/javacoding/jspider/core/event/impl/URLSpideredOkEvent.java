@@ -13,7 +13,7 @@ import java.net.URLConnection;
  *
  * $Id: URLSpideredOkEvent.java,v 1.6 2003/03/27 17:44:02 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class URLSpideredOkEvent extends URLRelatedBaseEventImpl {
 

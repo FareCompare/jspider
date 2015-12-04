@@ -9,7 +9,7 @@ import net.javacoding.jspider.spi.Plugin;
  *
  * $Id: DevNullPlugin.java,v 1.4 2003/04/03 16:25:12 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class DevNullPlugin implements Plugin {
 

@@ -10,7 +10,7 @@ package net.javacoding.jspider.core.task;
  *
  * $Id: WorkerTask.java,v 1.5 2003/04/25 21:29:02 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface WorkerTask extends Task {
 

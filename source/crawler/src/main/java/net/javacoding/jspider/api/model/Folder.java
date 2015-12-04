@@ -5,7 +5,7 @@ package net.javacoding.jspider.api.model;
  *
  * $Id: Folder.java,v 1.2 2003/04/09 17:08:03 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public interface Folder {
 

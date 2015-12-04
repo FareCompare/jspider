@@ -14,7 +14,7 @@ import net.javacoding.jspider.core.logging.Log;
  *
  * $Id: SimultaneousUsersThrottleProvider.java,v 1.6 2003/04/03 15:57:21 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class SimultaneousUsersThrottleProvider implements ThrottleProvider {
 

@@ -12,7 +12,7 @@ import net.javacoding.jspider.core.threading.WorkerThreadPool;
  *
  * $Id: DispatchThinkerTasks.java,v 1.6 2003/03/27 17:44:19 vanrogu Exp $
  *
- * @author Günther Van Roey
+ * @author Gunther Van Roey
  */
 public class DispatchThinkerTasks extends BaseDispatchTaskImpl {
 
