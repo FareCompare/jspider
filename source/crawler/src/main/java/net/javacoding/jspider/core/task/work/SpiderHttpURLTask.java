@@ -5,16 +5,25 @@ import net.javacoding.jspider.api.model.HTTPHeader;
 import net.javacoding.jspider.api.model.Resource;
 import net.javacoding.jspider.api.model.Site;
 import net.javacoding.jspider.core.SpiderContext;
+import net.javacoding.jspider.core.event.CoreEvent;
+import net.javacoding.jspider.core.event.impl.URLFoundEvent;
+import net.javacoding.jspider.core.event.impl.URLSpideredErrorEvent;
+import net.javacoding.jspider.core.event.impl.URLSpideredOkEvent;
 import net.javacoding.jspider.core.logging.Log;
 import net.javacoding.jspider.core.logging.LogFactory;
-import net.javacoding.jspider.core.event.CoreEvent;
-import net.javacoding.jspider.core.event.impl.*;
 import net.javacoding.jspider.core.task.WorkerTask;
-import net.javacoding.jspider.core.util.http.HTTPHeaderUtil;
 import net.javacoding.jspider.core.util.URLUtil;
+import net.javacoding.jspider.core.util.http.HTTPHeaderUtil;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.concurrent.locks.Lock;
 
 
@@ -25,6 +34,8 @@ import java.util.concurrent.locks.Lock;
  * @author G�nther Van Roey
  */
 public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
+
+    private int BUFFER_SIZE = 1024 * 128;
 
     private static final Log log = LogFactory.getLog( SpiderHttpURLTask.class );
 
@@ -93,19 +104,21 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
                 }
             }
             inputStream = new BufferedInputStream(connection.getInputStream());
+            ByteArrayOutputStream os = new ByteArrayOutputStream(BUFFER_SIZE);
 
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            InputStream is = new BufferedInputStream(inputStream);
-            //int size = connection.getContentLength();
             int size = 0;
-            try {
-                    int i = is.read();
-                    while (i != -1) {
-                        size++;
-                        os.write(i);
-                        i = is.read();
-                    }
-            } catch (IOException e) {
+            try (
+                    BufferedOutputStream out = new BufferedOutputStream( os, BUFFER_SIZE );
+                    InputStream is = new BufferedInputStream( inputStream )
+            ) {
+                int i = is.read();
+                while ( i != -1 ) {
+                    size++;
+                    out.write( i );
+                    i = is.read();
+                }
+                out.flush();
+            } catch ( IOException e ) {
                 log.warn( "i/o exception during fetch", e );
             }
 

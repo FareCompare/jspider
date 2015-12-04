@@ -34,7 +34,8 @@ class ResourceDAOImpl implements ResourceDAO {
     }
 
     public Resource registerURL(URL url) {
-        FolderInternal folder = ensureFolders(url);
+//        FolderInternal folder = ensureFolders(url);
+        FolderInternal folder = null;
         int id = ++counter;
         ResourceInternal resource = spi.getResource(url);
         if (resource == null) {
@@ -86,10 +87,10 @@ class ResourceDAOImpl implements ResourceDAO {
         return spi.getBySite(si);
     }
 
-    public Resource[] findByFolder(Folder folder) {
-        FolderInternal fi = TypeTranslator.translate(folder);
-        return spi.findByFolder(fi);
-    }
+//    public Resource[] findByFolder(Folder folder) {
+//        FolderInternal fi = TypeTranslator.translate(folder);
+//        return spi.findByFolder(fi);
+//    }
 
     public Resource getResource(URL url) {
         return spi.getResource(url);

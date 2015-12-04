@@ -90,8 +90,8 @@ class DecisionDAOImpl implements DecisionDAOSPI {
                      "    left join jspider_decision_step s\n" +
                      "      on d.resource = s.resource\n" +
                      "        and d.subject = s.subject\n" +
-                     "  where d.resource = 1\n" +
-                     "    and d.subject = 2\n" +
+                     "  where d.resource = ?\n" +
+                     "    and d.subject = ?\n" +
                      "  order by s.sequence";
 
         DecisionInternal decision = null;

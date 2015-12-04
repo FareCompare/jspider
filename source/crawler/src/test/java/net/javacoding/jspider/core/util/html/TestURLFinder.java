@@ -41,8 +41,11 @@ public class TestURLFinder {
 //        inputStream = getClass().getClassLoader().getResourceAsStream( "es-BOG.city.html" );
 //        url = new URL( "http://alpha.farecompare.com/es/vuelos/Bogot%C3%A1-BOG/city.html" );
 
-        inputStream = getClass().getClassLoader().getResourceAsStream( "es-index.html" );
-        url = new URL( "http://alpha.farecompare.com/es/index.html" );
+//        inputStream = getClass().getClassLoader().getResourceAsStream( "es-index.html" );
+//        url = new URL( "http://alpha.farecompare.com/es/index.html" );
+
+        inputStream = getClass().getClassLoader().getResourceAsStream( "es-home.html" );
+        url = new URL( "http://stg.farecompare.com/es/" );
     }
 
     @Test

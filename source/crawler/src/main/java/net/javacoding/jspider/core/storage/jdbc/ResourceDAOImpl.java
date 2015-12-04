@@ -20,23 +20,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 class ResourceDAOImpl implements ResourceDAOSPI {
 
-    public static final String ATTRIBUTE_ID = "id";
     public static final int ATTRIBUTE_ID_NDX = 1;
-    public static final String ATTRIBUTE_URL = "url";
     public static final int ATTRIBUTE_URL_NDX = 2;
-    public static final String ATTRIBUTE_STATE = "state";
     public static final int ATTRIBUTE_STATE_NDX = 3;
-    public static final String ATTRIBUTE_HTTP_STATUS = "httpstatus";
     public static final int ATTRIBUTE_HTTP_STATUS_NDX = 4;
-    public static final String ATTRIBUTE_SITE = "site";
     public static final int ATTRIBUTE_SITE_NDX = 5;
-    public static final String ATTRIBUTE_TIME = "timems";
     public static final int ATTRIBUTE_TIME_NDX = 6;
-    public static final String ATTRIBUTE_MIME = "mimetype";
     public static final int ATTRIBUTE_MIME_NDX = 7;
-    public static final String ATTRIBUTE_SIZE = "size";
     public static final int ATTRIBUTE_SIZE_NDX = 8;
-    public static final String ATTRIBUTE_FOLDER = "folder";
     public static final int ATTRIBUTE_FOLDER_NDX = 9;
 
     protected DBUtil dbUtil;
@@ -251,7 +242,10 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         ResourceInternal resource = getResource(url);
         resource.setFetched(event.getHttpStatus(), event.getSize(), event.getTimeMs(), event.getMimeType(), null, event.getHeaders());
         save(resource);
-        resource.setBytes(event.getBytes());
+        // Hack to not store content for non-html resources - see TextHtmlMimeTypeOnlyRule
+        if ( event.getMimeType().toLowerCase().contains( "text/html" ) ) {
+            resource.setBytes(event.getBytes());
+        }
     }
 
     public synchronized void setIgnoredForParsing(URL url) throws InvalidStateTransitionException {

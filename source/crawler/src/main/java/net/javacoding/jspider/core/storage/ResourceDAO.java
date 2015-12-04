@@ -29,7 +29,7 @@ public interface ResourceDAO {
 
     public Resource[] getBySite(Site site);
 
-    public Resource[] findByFolder (Folder folder);
+//    public Resource[] findByFolder (Folder folder);
 
     public Resource getResource(URL url);
 

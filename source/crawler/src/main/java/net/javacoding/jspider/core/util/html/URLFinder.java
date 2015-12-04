@@ -15,6 +15,7 @@ public class URLFinder {
 
     public static final String[] patterns = {
       "href=",
+      "href = ",
       "src=",
       "background="
     };
