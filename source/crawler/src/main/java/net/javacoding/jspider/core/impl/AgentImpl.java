@@ -231,10 +231,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         URL siteURL = URLUtil.getSiteURL(robotsTxtURL);
         SiteInternal site = (SiteInternal) storage.getSiteDAO().find(siteURL);
 
-        DecideOnSpideringTask[] tasks = scheduler.unblock(siteURL);
-        for (int i = 0; i < tasks.length; i++) {
-            scheduler.schedule(tasks[i]);
-        }
+        unblock( siteURL );
 
         storage.getResourceDAO().registerURL(robotsTxtURL);
         storage.getResourceDAO().setSpidered(robotsTxtURL, event);
@@ -255,10 +252,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         Site site = storage.getSiteDAO().find(siteURL);
         ((SiteInternal) site).registerRobotsTXTError();
 
-        DecideOnSpideringTask[] tasks = scheduler.unblock(siteURL);
-        for (int i = 0; i < tasks.length; i++) {
-            scheduler.schedule(tasks[i]);
-        }
+        unblock( siteURL );
 
         storage.getResourceDAO().registerURL(robotsTxtURL);
         storage.getResourceDAO().setError(robotsTxtURL, event);
@@ -273,10 +267,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         Site site = storage.getSiteDAO().find(siteURL);
         ((SiteInternal) site).registerNoRobotsTXTFound();
 
-        DecideOnSpideringTask[] tasks = scheduler.unblock(siteURL);
-        for (int i = 0; i < tasks.length; i++) {
-            scheduler.schedule(tasks[i]);
-        }
+        unblock( siteURL );
         storage.getSiteDAO().save(site);
         eventDispatcher.dispatch(new RobotsTXTMissingEvent(site));
     }
@@ -284,12 +275,15 @@ public class AgentImpl implements Agent, CoreEventVisitor {
     public void visit(URL url, RobotsTXTSkippedEvent event) {
         Site site = event.getSite();
         ((SiteInternal) site).registerRobotsTXTSkipped();
-        DecideOnSpideringTask[] tasks = scheduler.unblock(site.getURL());
-        for ( DecideOnSpideringTask task : tasks ) {
-            scheduler.schedule( task );
-        }
+        URL siteURL = site.getURL();
+        unblock( siteURL );
         storage.getSiteDAO().save(site);
     }
 
-
+    private void unblock( URL siteURL ) {
+        DecideOnSpideringTask[] tasks = scheduler.unblock(siteURL);
+        for ( DecideOnSpideringTask task : tasks ) {
+            scheduler.schedule( task );
+        }
+    }
 }
