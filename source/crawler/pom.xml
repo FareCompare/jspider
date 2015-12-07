@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>net.javacoding.jspider</groupId>
 		<artifactId>jspider</artifactId>
-		<version>0.2-SNAPSHOT</version>
+		<version>0.1.1</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
