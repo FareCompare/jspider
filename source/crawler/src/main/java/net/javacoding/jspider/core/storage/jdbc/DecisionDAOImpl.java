@@ -45,7 +45,8 @@ class DecisionDAOImpl implements DecisionDAOSPI {
                         "INSERT INTO jspider_decision ( resource, subject, type, comment ) VALUES (?,?,?,?)" +
                         "       ON DUPLICATE KEY UPDATE type = VALUES(type), comment = VALUES(comment)" );
                 PreparedStatement ps2 = connection.prepareStatement(
-                        "INSERT INTO jspider_decision_step ( resource, subject, sequence, type, rule, decision, comment ) VALUES (?,?,?,?,?,?,?)" )
+                        "INSERT INTO jspider_decision_step ( resource, subject, sequence, type, rule, decision, comment ) VALUES (?,?,?,?,?,?,?)" +
+                        "       ON DUPLICATE KEY UPDATE type = VALUES(type), comment = VALUES(comment)")
 
         ) {
             ps.setInt( 1, resource.getId() );
@@ -72,7 +73,8 @@ class DecisionDAOImpl implements DecisionDAOSPI {
             }
         }
         catch ( SQLException e ) {
-            log.error( "SQLException", e );
+            log.error( String.format("SQLException on saveDecision%n\tsubject: %s%n\tresource: %s%n\tdecision: %s",
+                                     subject, resource, decision), e );
         }
     }
 
