@@ -50,7 +50,7 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
     SELECT 'id', 'url', 'httpstatus'
     UNION (
     SELECT r1.id, r1.url, r1.httpstatus
-      INTO OUTFILE '/usr/local/jspider/output/non_200_resouces_D150515_02.csv'
+      INTO OUTFILE '/usr/local/jspider/output/non_200_resouces_D151215_01.csv'
            FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
            LINES TERMINATED BY '\n'
       FROM jspider_resource r1
@@ -81,26 +81,30 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
     -- These queries will show what urls in the url_validation table were not crawled. - Farecompare only
     --
 
-    -- Site Code 1 - old
-    SELECT COUNT(*) FROM (
-    SELECT uri FROM seo_ml.url_validation WHERE siteCode = 1 AND returnCode = 200 AND uri NOT IN(
-           SELECT SUBSTR(url from length('http://www.farecompare.com/')) as part
-             FROM seo_spider.jspider_resource WHERE url LIKE 'http://www.farecompare.com/%' )
-             ) t;
+    -- Temp table with urls that should be crawled
+    DROP TABLE IF EXISTS temp_urls;
+    CREATE TABLE temp_urls (
+       url        VARCHAR(300) NOT NULL
+    )
+    ENGINE = InnoDB;
+    INSERT INTO temp_urls SELECT CONCAT('http://www.farecompare.com',uri) FROM seo_ml.url_validation WHERE siteCode = 1 and returnCode = 200;
+    INSERT INTO temp_urls SELECT CONCAT('http://www.farecompare.com/es',uri) FROM seo_ml.url_validation WHERE siteCode = 2 and returnCode = 200;
+    ALTER TABLE temp_urls ADD INDEX (url);
 
-    -- Site Code 2
-    SELECT * FROM (
-    SELECT uri FROM seo_ml.url_validation WHERE siteCode = 2 AND returnCode = 200 AND uri NOT IN(
-           SELECT SUBSTR(url from length('http://stg.farecompare.com/es/')) as part
-             FROM seo_spider.jspider_resource WHERE url LIKE 'http://stg.farecompare.com/es%' )
-             ) t
-    INTO OUTFILE '/usr/local/jspider/output/not_crawled_report_D151210_03.csv'
-               FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
-               LINES TERMINATED BY '\n';
+    -- Temp table with urls that were crawled
+    DROP TABLE IF EXISTS temp_urls_crawled;
+    CREATE TABLE temp_urls_crawled (
+       url        VARCHAR(300) NOT NULL
+    )
+    ENGINE = InnoDB;
+    INSERT INTO temp_urls_crawled SELECT url FROM jspider_resource;
+    ALTER TABLE temp_urls_crawled ADD INDEX (url);
 
-    -- Site Code 4
-    SELECT COUNT(*) FROM (
-    SELECT uri FROM seo_ml.url_validation WHERE siteCode = 4 AND returnCode = 200 AND uri NOT IN(
-           SELECT SUBSTR(url from length('http://www.farecompare.mx/')) as part
-             FROM seo_spider.jspider_resource WHERE url LIKE 'http://www.farecompare.mx/%')
-             ) t;
+    -- Not Crawled
+    DROP TABLE IF EXISTS url_not_crawled_D151215_01;
+    CREATE TABLE url_not_crawled_D151215_01 LIKE temp_urls;
+
+    INSERT INTO url_not_crawled_D151215_01
+    select u.url from temp_urls u
+      left join temp_urls_crawled c on c.url = u.url
+     where c.url is null;
