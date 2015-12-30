@@ -22,6 +22,7 @@ import net.javacoding.jspider.core.util.URLUtil;
 
 import java.io.ByteArrayInputStream;
 import java.net.URL;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
 
@@ -74,6 +75,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
                 throw e;
             } catch (TaskAssignmentException e) {
                 try {
+                    checkBlockedUrls();
                     Thread.sleep( 1000 );
                 } catch (InterruptedException e1) {
                     Thread.currentThread().interrupt();
@@ -90,6 +92,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
                 throw e;
             } catch (TaskAssignmentException e) {
                 try {
+                    checkBlockedUrls();
                     Thread.sleep( 1000 );
                 } catch (InterruptedException e1) {
                     Thread.currentThread().interrupt();
@@ -284,6 +287,15 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         DecideOnSpideringTask[] tasks = scheduler.unblock(siteURL);
         for ( DecideOnSpideringTask task : tasks ) {
             scheduler.schedule( task );
+        }
+    }
+
+    private void checkBlockedUrls() {
+        if ( scheduler.hasOnlyBlockedTasks() ) {
+            Set<URL> blockedUrls = scheduler.getBlockedUrls();
+            for ( URL url : blockedUrls ) {
+                unblock( url );
+            }
         }
     }
 }

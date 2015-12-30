@@ -3,7 +3,6 @@ package net.javacoding.jspider.core.event.impl;
 
 import net.javacoding.jspider.core.SpiderContext;
 import net.javacoding.jspider.core.event.CoreEventVisitor;
-import net.javacoding.jspider.api.model.Folder;
 
 import java.net.URL;
 
@@ -34,7 +33,7 @@ public class URLFoundEvent extends BaseCoreEventImpl {
     }
 
     public void accept(URL url, CoreEventVisitor visitor) {
-        visitor.visit(url, this);
+            visitor.visit( url, this );
     }
 
 }
