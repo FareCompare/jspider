@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS jspider_folder (
 
 CREATE TABLE IF NOT EXISTS jspider_resource (
     id         INT(11)  NOT NULL AUTO_INCREMENT,
-    url        LONGTEXT NOT NULL,
+    url        VARCHAR(300) NOT NULL,
     state      INT(11)  NOT NULL DEFAULT '0',
     httpstatus INT(11)  NOT NULL DEFAULT '0',
     site       INT(11)  NOT NULL DEFAULT '0',
@@ -142,7 +142,8 @@ CREATE TABLE IF NOT EXISTS jspider_resource (
     folder     INT(11)  NOT NULL DEFAULT '0',
     PRIMARY KEY (id),
     KEY siteIdx (site),
-    KEY folderIdx (folder)
+    KEY folderIdx (folder),
+    KEY urlIdx (url)
 )
     ENGINE = InnoDB;
 

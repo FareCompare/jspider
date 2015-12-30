@@ -47,6 +47,12 @@ public class SchedulerImpl implements Scheduler {
         return blockedCount;
     }
 
+    public Set<URL> getBlockedUrls() {
+        synchronized (blocked) {
+            return blocked.keySet();
+        }
+    }
+
     public int getAssignedCount( ) {
         return assignedSpiderTasks.size() + assignedThinkerTasks.size();
     }
@@ -223,6 +229,20 @@ public class SchedulerImpl implements Scheduler {
                 assignedSpiderTasks.size() == 0 &&
                 assignedThinkerTasks.size() == 0 &&
                 blocked.size() == 0 );
+    }
+
+    /**
+     * Determines whether all the tasks are done.   If there are no more tasks
+     * scheduled for process, and no ongoing tasks, it is impossible that new
+     * work will arrive, so the spidering is done.
+     * @return boolean value determining whether all work is done
+     */
+    public synchronized boolean hasOnlyBlockedTasks() {
+        return (fetchTasks.size() == 0 &&
+                thinkerTasks.size() == 0 &&
+                assignedSpiderTasks.size() == 0 &&
+                assignedThinkerTasks.size() == 0 &&
+                blocked.size() != 0 );
     }
 
     /*

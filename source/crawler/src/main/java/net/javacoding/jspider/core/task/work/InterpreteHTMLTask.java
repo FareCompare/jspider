@@ -58,10 +58,10 @@ public class InterpreteHTMLTask extends BaseWorkerTaskImpl implements URLFinderC
             }
             event = new ResourceParsedOkEvent(context, url);
         } catch (IOException e) {
-            LogFactory.getLog(InterpreteHTMLTask.class).error("i/o exception during parse", e);
+            LogFactory.getLog(InterpreteHTMLTask.class).error("i/o exception during parse " + url, e);
             event = new ResourceParsedErrorEvent(context, url, e);
         } catch (Exception e) {
-            LogFactory.getLog(InterpreteHTMLTask.class).error("exception during parse", e);
+            LogFactory.getLog(InterpreteHTMLTask.class).error("exception during parse " + url, e);
             event = new ResourceParsedErrorEvent(context, url, e);
         } finally {
             Thread.currentThread().setName( threadName );

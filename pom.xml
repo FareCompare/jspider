@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.javacoding.jspider</groupId>
     <artifactId>jspider</artifactId>
-    <version>0.1.1</version>
+    <version>0.2</version>
     <packaging>pom</packaging>
     <name>jspider</name>
 
@@ -346,6 +346,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>18.0</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.jsoup</groupId>
+            	<artifactId>jsoup</artifactId>
+            	<version>1.8.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

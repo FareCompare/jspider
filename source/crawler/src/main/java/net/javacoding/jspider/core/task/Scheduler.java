@@ -4,6 +4,7 @@ import net.javacoding.jspider.core.exception.TaskAssignmentException;
 import net.javacoding.jspider.core.task.work.DecideOnSpideringTask;
 
 import java.net.URL;
+import java.util.Set;
 
 
 /**
@@ -23,7 +24,7 @@ public interface Scheduler {
      * reference to the task and return it later on to be processed.
      * @param task task to be scheduled
      */
-    public void schedule(WorkerTask task);
+    void schedule( WorkerTask task );
 
     /**
      * Block a task for a certain siteURL.  This is used to block any
@@ -32,7 +33,7 @@ public interface Scheduler {
      * @param siteURL the site for which the task is
      * @param task the task to be temporarily blocked
      */
-    public void block( URL siteURL, DecideOnSpideringTask task);
+    void block( URL siteURL, DecideOnSpideringTask task );
 
     /**
      * Returns all tasks that were blocked for the specified site, and
@@ -40,14 +41,14 @@ public interface Scheduler {
      * @param siteURL the site we want to unblock all resources for
      * @return array with all tasks that were blocked for this site
      */
-    public DecideOnSpideringTask[] unblock(URL siteURL);
+    DecideOnSpideringTask[] unblock( URL siteURL );
 
     /**
      * Flags a task as done.  This way, we are able to remove the task from
      * the in-process list.
      * @param task task that was completed
      */
-    public void flagDone(WorkerTask task);
+    void flagDone( WorkerTask task );
 
     /**
      * Returns a thinker task to be processed
@@ -55,7 +56,7 @@ public interface Scheduler {
      * @throws TaskAssignmentException if all the work is done or no suitable
      * items are found for the moment.
      */
-    public WorkerTask getThinkerTask() throws TaskAssignmentException;
+    WorkerTask getThinkerTask() throws TaskAssignmentException;
 
     /**
      * Returns a fetch task to be processed
@@ -63,7 +64,7 @@ public interface Scheduler {
      * @throws TaskAssignmentException if all the work is done or no suitable
      * items are found for the moment.
      */
-    public WorkerTask getFetchTask() throws TaskAssignmentException;
+    WorkerTask getFetchTask() throws TaskAssignmentException;
 
     /**
      * Determines whether all the tasks are done.   If there are no more tasks
@@ -71,56 +72,60 @@ public interface Scheduler {
      * work will arrive, so the spidering is done.
      * @return boolean value determining whether all work is done
      */
-    public boolean allTasksDone();
+    boolean allTasksDone();
 
     /**
      * Statistics method.
      * @return blocked jobs counter
      */
-    public int getBlockedCount( );
+    int getBlockedCount();
+
+    Set<URL> getBlockedUrls();
+
+    boolean hasOnlyBlockedTasks();
 
     /**
      * Statistics method.
      * @return assigned jobs counter
      */
-    public int getAssignedCount( );
+    int getAssignedCount();
 
     /**
      * Statistics method.
      * @return total jobs counter
      */
-    public int getJobCount ( );
+    int getJobCount();
 
     /**
      * Statistics method.
      * @return total thinker jobs counter
      */
-    public int getThinkerJobCount ( );
+    int getThinkerJobCount();
 
     /**
      * Statistics method.
      * @return total spider jobs counter
      */
-    public int getSpiderJobCount ( );
+    int getSpiderJobCount();
 
     /**
      * Statistics method.
      * @return jobs finished counter
      */
-    public int getJobsDone ( );
+    int getJobsDone();
 
     /**
      * Statistics method.
      * @return finished spider jobs counter
      */
-    public int getSpiderJobsDone ( );
+    int getSpiderJobsDone();
 
     /**
      * Statistics method.
      * @return finished thinker jobs counter
      */
-    public int getThinkerJobsDone ( );
+    int getThinkerJobsDone();
 
-    public int getSpiderQueueSize();
-    public int getThinkerQueueSize();
+    int getSpiderQueueSize();
+    int getThinkerQueueSize();
 }
