@@ -7,6 +7,7 @@ import net.javacoding.jspider.core.storage.spi.StorageSPI;
 import net.javacoding.jspider.core.storage.exception.InvalidStateTransitionException;
 import net.javacoding.jspider.core.logging.LogFactory;
 import net.javacoding.jspider.core.logging.Log;
+import org.apache.commons.lang.StringUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -243,7 +244,7 @@ class ResourceDAOImpl implements ResourceDAOSPI {
         resource.setFetched(event.getHttpStatus(), event.getSize(), event.getTimeMs(), event.getMimeType(), null, event.getHeaders());
         save(resource);
         // Hack to not store content for non-html resources - see TextHtmlMimeTypeOnlyRule
-        if ( event.getMimeType().toLowerCase().contains( "text/html" ) ) {
+        if ( StringUtils.containsIgnoreCase( event.getMimeType(), "text/html" ) ) {
             resource.setBytes(event.getBytes());
         }
     }
