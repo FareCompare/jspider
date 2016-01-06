@@ -75,8 +75,8 @@ public class AgentImpl implements Agent, CoreEventVisitor {
                 throw e;
             } catch (TaskAssignmentException e) {
                 try {
-                    checkBlockedUrls();
                     Thread.sleep( 1000 );
+                    checkBlockedUrls();
                 } catch (InterruptedException e1) {
                     Thread.currentThread().interrupt();
                 }
@@ -92,8 +92,8 @@ public class AgentImpl implements Agent, CoreEventVisitor {
                 throw e;
             } catch (TaskAssignmentException e) {
                 try {
-                    checkBlockedUrls();
                     Thread.sleep( 1000 );
+                    checkBlockedUrls();
                 } catch (InterruptedException e1) {
                     Thread.currentThread().interrupt();
                 }
@@ -138,7 +138,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
     }
 
 
-    public void visit(URL url, CoreEvent event) {
+    public void visit(URL url, CoreEvent event ) {
         log.error( "ERROR -- UNHANDLED COREEVENT IN AGENT !!!" );
     }
 
@@ -150,7 +150,8 @@ public class AgentImpl implements Agent, CoreEventVisitor {
 
     public void visit(URL url, URLSpideredErrorEvent event) {
         storage.getResourceDAO().setError( url, event );
-        eventDispatcher.dispatch(new ResourceFetchErrorEvent(storage.getResourceDAO().getResource(url), event.getHttpStatus()));
+        eventDispatcher.dispatch(
+                new ResourceFetchErrorEvent( storage.getResourceDAO().getResource(url), event.getHttpStatus()));
     }
 
     public void visit(URL url, ResourceParsedOkEvent event) {
@@ -239,13 +240,13 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         storage.getResourceDAO().registerURL(robotsTxtURL);
         storage.getResourceDAO().setSpidered(robotsTxtURL, event);
         storage.getResourceDAO().setIgnoredForParsing(robotsTxtURL);
-        Resource resource = storage.getResourceDAO().getResource(robotsTxtURL);
+        Resource resource = storage.getResourceDAO().getResource(robotsTxtURL );
         byte[] bytes = event.getBytes();
         site.registerRobotsTXT();
         eventDispatcher.dispatch(new ResourceDiscoveredEvent(resource));
         eventDispatcher.dispatch(new ResourceFetchedEvent(resource));
         eventDispatcher.dispatch(new RobotsTXTFetchedEvent(site, new String(bytes)));
-        context.registerRobotsTXT(site, new ByteArrayInputStream(bytes));
+        context.registerRobotsTXT(site, new ByteArrayInputStream(bytes ) );
         storage.getSiteDAO().save(site);
     }
 
@@ -271,7 +272,7 @@ public class AgentImpl implements Agent, CoreEventVisitor {
         ((SiteInternal) site).registerNoRobotsTXTFound();
 
         unblock( siteURL );
-        storage.getSiteDAO().save(site);
+        storage.getSiteDAO().save( site );
         eventDispatcher.dispatch(new RobotsTXTMissingEvent(site));
     }
 
@@ -292,8 +293,10 @@ public class AgentImpl implements Agent, CoreEventVisitor {
 
     private void checkBlockedUrls() {
         if ( scheduler.hasOnlyBlockedTasks() ) {
+            log.warn( "Scheduler has only blocked tasks.  Will auto unblock." );
             Set<URL> blockedUrls = scheduler.getBlockedUrls();
             for ( URL url : blockedUrls ) {
+                log.info( "Unblocking URL: " + url );
                 unblock( url );
             }
         }
