@@ -5,8 +5,8 @@ echo JSpider startup script
 
 if [ ! -d "$JSPIDER_HOME" ]; then
   echo JSPIDER_HOME does not exist as a valid directory : $JSPIDER_HOME
-  echo Defaulting to current directory
-  JSPIDER_HOME=..
+  echo Defaulting to /usr/local/jspider
+  JSPIDER_HOME=/usr/local/jspider
 fi
 
 echo JSPIDER_HOME=$JSPIDER_HOME
@@ -26,6 +26,8 @@ echo "using output=$OUTPUT"
 export JSPIDER_OPTS=
 export JSPIDER_OPTS="$JSPIDER_OPTS -Djspider.home=$JSPIDER_HOME"
 
+JAVA=/usr/local/java/bin/java
+
 JAVA_OPTS="-Xmx16G"
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote"
 JAVA_OPTS="$JAVA_OPTS -Dcom.sun.management.jmxremote.port=9998"
@@ -41,6 +43,6 @@ JFRFILE=$JSPIDER_HOME/output/jspider_${DATE}.jfr
 #JFR="-XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:+FlightRecorderOptions=\"filename=$JFRFILE,defaultrecording=true,delay=30s,duration=10m\""
 JFR="-XX:+UnlockCommercialFeatures -XX:+FlightRecorder -XX:StartFlightRecording=filename=$JFRFILE,defaultrecording=true,delay=30s,duration=5m"
 
-nohup java $JAVA_OPTS $JSPIDER_OPTS $DEBUG $JFR -jar $JSPIDER_HOME/lib/jspider-crawler-*-exe.jar $1 $2 > $OUTPUT 2>&1 &
-#java $JAVA_OPTS $JSPIDER_OPTS $DEBUG $JFR -jar $JSPIDER_HOME/lib/jspider-crawler-*-exe.jar $1 $2
+nohup $JAVA $JAVA_OPTS $JSPIDER_OPTS $DEBUG $JFR -jar $JSPIDER_HOME/lib/jspider-crawler-*-exe.jar $1 $2 > $OUTPUT 2>&1 &
+#$JAVA $JAVA_OPTS $JSPIDER_OPTS $DEBUG $JFR -jar $JSPIDER_HOME/lib/jspider-crawler-*-exe.jar $1 $2
 

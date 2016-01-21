@@ -50,7 +50,7 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
     SELECT 'id', 'url', 'httpstatus'
     UNION (
     SELECT r1.id, r1.url, r1.httpstatus
-      INTO OUTFILE '/usr/local/jspider/output/jspider-D160105_02-non_200_resouces.csv'
+      INTO OUTFILE '/usr/local/jspider/output/jspider-D160112_02-non_200_resouces.csv'
            FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
            LINES TERMINATED BY '\n'
       FROM jspider_resource r1
@@ -63,7 +63,7 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
     SELECT 'id', 'url', 'httpstatus', 'id', 'referer'
     UNION (
     SELECT r1.id, r1.url, r1.httpstatus, r2.id, r2.url as referer
-      INTO OUTFILE '/usr/local/jspider/output/jspider-D160105_02-non_200_report.csv'
+      INTO OUTFILE '/usr/local/jspider/output/jspider-D160112_02-non_200_report.csv'
            FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
            LINES TERMINATED BY '\n'
       FROM jspider_resource r1, jspider_resource r2, jspider_resource_reference x
@@ -101,16 +101,16 @@ http://sourceforge.net/projects/j-spider/.  Minor customizations have been made 
     ALTER TABLE temp_urls_crawled ADD INDEX (url);
 
     -- Not Crawled
-    DROP TABLE IF EXISTS url_not_crawled_D160105_02;
-    CREATE TABLE url_not_crawled_D160105_02 LIKE temp_urls;
+    DROP TABLE IF EXISTS url_not_crawled_D160112_02;
+    CREATE TABLE url_not_crawled_D160112_02 LIKE temp_urls;
 
-    INSERT INTO url_not_crawled_D160105_02
+    INSERT INTO url_not_crawled_D160112_02
     select u.url from temp_urls u
       left join temp_urls_crawled c on c.url = u.url
      where c.url is null;
 
     SELECT *
-      INTO OUTFILE '/usr/local/jspider/output/jspider-D160105_02-not-crawled.csv'
+      INTO OUTFILE '/usr/local/jspider/output/jspider-D160112_02-not-crawled.csv'
                FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"'
                LINES TERMINATED BY '\n'
-      FROM url_not_crawled_D160105_02;
+      FROM url_not_crawled_D160112_02;
