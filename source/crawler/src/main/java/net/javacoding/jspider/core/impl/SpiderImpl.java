@@ -17,10 +17,17 @@ import net.javacoding.jspider.core.util.config.ConfigurationFactory;
 import net.javacoding.jspider.core.util.config.MappedPropertySet;
 import net.javacoding.jspider.core.util.config.PropertySet;
 import net.javacoding.jspider.core.util.statistics.StopWatch;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
 
 
 /**
@@ -32,12 +39,13 @@ import java.io.InputStreamReader;
 public class SpiderImpl implements Spider {
 
     public static final int DEFAULT_MONITORING_INTERVAL = 1000;
+    private Log log = LogFactory.getLog(Spider.class);
 
     protected WorkerThreadPool spiders;
     protected WorkerThreadPool thinkers;
 
     public SpiderImpl(SpiderContext context, int spiderThreads, int thinkerThreads) {
-        LogFactory.getLog(Spider.class).info( "Spider born - threads: spiders: " + spiderThreads + ", thinkers: " + thinkerThreads );
+        log.info( "Spider born - threads: spiders: " + spiderThreads + ", thinkers: " + thinkerThreads );
         spiders = new WorkerThreadPool("Spiders", "Spider", spiderThreads);
         thinkers = new WorkerThreadPool("Thinkers", "Thinker", thinkerThreads);
 
@@ -90,7 +98,6 @@ public class SpiderImpl implements Spider {
             }
         }
 
-        Log log = LogFactory.getLog(Spider.class);
         log.debug("Stopping spider workers...");
         spiders.stopAll();
         log.info("Stopped spider workers...");
@@ -104,6 +111,42 @@ public class SpiderImpl implements Spider {
         context.getEventDispatcher().shutdown();
 
         log.info( "Spidering done!" );
-        log.info( "Elapsed time : " + StopWatch.formatDuration( System.currentTimeMillis() - start ) );
+        String duration = StopWatch.formatDuration( System.currentTimeMillis() - start );
+        log.info( "Elapsed time : " + duration );
+
+        sendMessage( "JSpider complete, duration " + duration, "#teamjeff" );
+    }
+
+
+    private void sendMessage( String message, String channel ) {
+        String sender;
+        try {
+            String hostName = InetAddress.getLocalHost().getHostName();
+            sender = "jspider@" + hostName;
+        } catch ( UnknownHostException e ) {
+            log.warn( e.getMessage(), e );
+            sender = "jspider";
+        }
+
+        log.info( "Sending to : " + channel + " message:" + message );
+
+        GetMethod method = new GetMethod( String.format("https://slack.com/api/chat.postMessage?token=xoxp-6525398036-6525294374-12436352048-88ceba57d1&channel=%s&username=%s&pretty=1&text=%s",
+                                                        URLEncoder.encode( channel ),
+                                                        URLEncoder.encode( sender ),
+                                                        URLEncoder.encode( message) )
+                                                        );
+        try {
+            HttpClient httpClient = new HttpClient();
+            httpClient.executeMethod( method );
+        } catch ( IOException e ) {
+            String xmlResponse = null;
+            try {
+                xmlResponse = method.getResponseBodyAsString();
+            } catch ( IOException e1 ) {
+                xmlResponse = "Failed to response body!";
+                log.error( xmlResponse, e1 );
+            }
+            log.error( "Failed to send message to slack. Response:\n" + xmlResponse, e );
+        }
     }
 }
