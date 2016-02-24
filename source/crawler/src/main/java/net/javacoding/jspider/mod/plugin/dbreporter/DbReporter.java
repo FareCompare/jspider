@@ -37,9 +37,15 @@ import net.javacoding.jspider.core.util.config.JSpiderConfiguration;
 import net.javacoding.jspider.core.util.config.PropertySet;
 import net.javacoding.jspider.core.util.statistics.StopWatch;
 import net.javacoding.jspider.spi.Plugin;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,6 +59,7 @@ import java.sql.SQLException;
  */
 public class DbReporter implements Plugin, EventVisitor {
 
+    public static final String SLACK_CHANNEL = "#teamjeff";
     private Log log = LogFactory.getLog( this.getClass() );
     private URL baseURL;
     private String jspiderRun;
@@ -237,7 +244,9 @@ public class DbReporter implements Plugin, EventVisitor {
         } finally {
             dbUtil.safeClose( rs, log );
         }
-        log.info( "reportNon200UrlsAll completed: " + output + ", duration " + timer );
+        String msg = "reportNon200UrlsAll completed: " + output + ", duration " + timer;
+        sendMessage( msg, SLACK_CHANNEL );
+        log.info( msg );
     }
 
     private void reportCountsByHttpStatus( DBUtil dbUtil ) {
@@ -252,15 +261,51 @@ public class DbReporter implements Plugin, EventVisitor {
         ) {
             rs = ps.executeQuery();
             while ( rs.next() ) {
-                report.addRow( String.valueOf( rs.getObject( 1 ) ), String.valueOf( rs.getInt( 2 ) ) );
+                Object httpStatus = rs.getObject( 1 );
+                int count = rs.getInt( 2 );
+                report.addRow( String.valueOf( httpStatus ), String.format( "%,10d", count ) );
             }
-            log.info( "Counts By HTTP Status\n" + report.buildReport() );
+            String reportText = report.buildReport();
+            sendMessage( "JSpider Counts by HTTP Status\n" + reportText, SLACK_CHANNEL );
+            log.info( "Counts By HTTP Status\n" + reportText );
         } catch ( SQLException e ) {
             log.error( "SQLException", e );
         } finally {
             dbUtil.safeClose( rs, log );
         }
         log.info( "CountsByHttpStatus completed, duration " + timer );
+    }
+
+    private void sendMessage( String message, String channel ) {
+        String sender;
+        try {
+            String hostName = InetAddress.getLocalHost().getHostName();
+            sender = "jspider@" + hostName;
+        } catch ( UnknownHostException e ) {
+            log.warn( e.getMessage(), e );
+            sender = "jspider";
+        }
+
+        log.info( "Sending to : " + channel + " message:" + message );
+
+        GetMethod method = new GetMethod( String.format("https://slack.com/api/chat.postMessage?token=xoxp-6525398036-6525294374-12436352048-88ceba57d1&channel=%s&username=%s&pretty=1&text=%s",
+                                                        URLEncoder.encode( channel ),
+                                                        URLEncoder.encode( sender ),
+                                                        URLEncoder.encode( message) )
+                                                        );
+        try {
+            HttpClient httpClient = new HttpClient();
+            httpClient.executeMethod( method );
+        } catch ( IOException e ) {
+            String xmlResponse = null;
+            try {
+                xmlResponse = method.getResponseBodyAsString();
+            } catch ( IOException e1 ) {
+                xmlResponse = "Failed to response body!";
+                log.error( xmlResponse, e1 );
+            }
+            log.error( "Failed to send message to slack. Response:\n" + xmlResponse, e );
+        }
     }
 
     @Override
