@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS jspider_folder (
 
 CREATE TABLE IF NOT EXISTS jspider_resource (
     id         INT(11)  NOT NULL AUTO_INCREMENT,
-    url        VARCHAR(300) NOT NULL,
+    url        VARCHAR(255) NOT NULL,
     state      INT(11)  NOT NULL DEFAULT '0',
     httpstatus INT(11)  NOT NULL DEFAULT '0',
     site       INT(11)  NOT NULL DEFAULT '0',
