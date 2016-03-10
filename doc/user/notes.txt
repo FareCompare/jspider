@@ -1,0 +1,38 @@
+
+EventDispatcher.dispatch( JSpiderEvent event );
+Scheduler.schedule(WorkerTask task);
+
+URLFoundEvent
+ - SiteDiscoveredEvent
+ - FetchRobotsTXTTaskImpl
+ - DecideOnSpideringTask
+ - RobotsTXTSkippedEvent
+ - DecideOnSpideringTask
+ - ResourceDiscoveredEvent
+ - ResourceReferenceDiscoveredEvent
+
+DecideOnSpideringTask
+- Agent.scheduleForSpidering
+- SpiderHttpURLTask
+
+SpiderHttpURLTask (reads content from url)
+ - URLSpideredOkEvent
+ - URLSpideredErrorEvent
+ - URLSpideredErrorEvent
+
+URLSpideredOkEvent (
+ - ResourceFetchedEvent
+ - DecideOnParsingTask
+
+DecideOnParsingTask
+ - InterpreteHTMLTask
+
+InterpreteHTMLTask
+ - EMailAddressDiscoveredEvent
+ - EMailAddressReferenceDiscoveredEvent
+ - URLFoundEvent
+ - ResourceParsedOkEvent
+ - ResourceParsedErrorEvent
+
+ResourceParsedOkEvent
+ - ResourceParsedEvent
