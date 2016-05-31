@@ -42,6 +42,7 @@ import org.apache.commons.httpclient.methods.GetMethod;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -50,6 +51,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * <p><tt>DbReporter</tt> </p>
@@ -59,24 +61,40 @@ import java.sql.SQLException;
  */
 public class DbReporter implements Plugin, EventVisitor {
 
-    public static final String SLACK_CHANNEL = "#teamjeff";
     private Log log = LogFactory.getLog( this.getClass() );
     private URL baseURL;
     private String jspiderRun;
-
-    public DbReporter() {
-        log.info( "DbReporter<init>" );
-        initJspiderRun();
-    }
+    private PropertySet config;
+    private String slackToken;
+    private String slackChannel;
 
     public DbReporter (PropertySet config ) {
         log.info( "DbReporter<init>" );
+        this.config = config;
         initJspiderRun();
     }
 
     private void initJspiderRun() {
         jspiderRun = System.getProperty( "jspider.run", "" );
         log.info( "jspiderRun=" + jspiderRun );
+
+        String urlString = config.getString( "slack.properties", null );
+        if ( urlString != null ) {
+            try {
+                URL url = new URL( urlString);
+                InputStream inputStream = url.openStream();
+                Properties slackProperties = new Properties(  );
+                slackProperties.load( inputStream );
+                log.info( "Loaded slack properties from " + urlString );
+                slackToken = slackProperties.getProperty( "token" );
+                slackChannel = slackProperties.getProperty( "channel" );
+                System.out.printf( "slackToken=%s%nslackChannel=%s%n", slackToken, slackChannel );
+            } catch ( IOException e ) {
+                log.error( "Failed to load slack properties from " + urlString, e );
+            }
+        } else {
+            log.warn( "slack.properties plugin config not set, no slack messages will be sent" );
+        }
     }
 
     //
@@ -245,7 +263,7 @@ public class DbReporter implements Plugin, EventVisitor {
             dbUtil.safeClose( rs, log );
         }
         String msg = "reportNon200UrlsAll completed: " + output + ", duration " + timer;
-        sendMessage( msg, SLACK_CHANNEL );
+        sendSlackMessage( msg );
         log.info( msg );
     }
 
@@ -266,7 +284,7 @@ public class DbReporter implements Plugin, EventVisitor {
                 report.addRow( String.valueOf( httpStatus ), String.format( "%,10d", count ) );
             }
             String reportText = report.buildReport();
-            sendMessage( "JSpider Counts by HTTP Status\n" + reportText, SLACK_CHANNEL );
+            sendSlackMessage( "JSpider Counts by HTTP Status\n" + reportText );
             log.info( "Counts By HTTP Status\n" + reportText );
         } catch ( SQLException e ) {
             log.error( "SQLException", e );
@@ -276,7 +294,11 @@ public class DbReporter implements Plugin, EventVisitor {
         log.info( "CountsByHttpStatus completed, duration " + timer );
     }
 
-    private void sendMessage( String message, String channel ) {
+    private void sendSlackMessage( String message ) {
+        if ( slackToken == null ) {
+            log.warn("Slack properties not set, bypass sending message:\n" + message);
+            return;
+        }
         String sender;
         try {
             String hostName = InetAddress.getLocalHost().getHostName();
@@ -286,10 +308,11 @@ public class DbReporter implements Plugin, EventVisitor {
             sender = "jspider";
         }
 
-        log.info( "Sending to : " + channel + " message:" + message );
+        log.info( "Sending to : " + slackChannel + " message:" + message );
 
-        GetMethod method = new GetMethod( String.format("https://slack.com/api/chat.postMessage?token=xoxp-6525398036-6525294374-12436352048-88ceba57d1&channel=%s&username=%s&pretty=1&text=%s",
-                                                        URLEncoder.encode( channel ),
+        GetMethod method = new GetMethod( String.format("https://slack.com/api/chat.postMessage?token=%s&channel=%s&username=%s&pretty=1&text=%s",
+                                                        slackToken,
+                                                        URLEncoder.encode( slackChannel ),
                                                         URLEncoder.encode( sender ),
                                                         URLEncoder.encode( message) )
                                                         );

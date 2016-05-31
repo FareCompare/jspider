@@ -10,12 +10,15 @@ import org.junit.Test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.InetAddress;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.util.Properties;
 
 /**
  * <p><tt>TestSlack</tt> </p>
@@ -99,6 +102,19 @@ public class TestSlack {
         } catch ( Exception e ) {
             throw new RuntimeException( "failed to executeDDL: " + message, e );
         }
+    }
+
+    @Test
+    public void loadSlackProperties() throws Exception {
+        String urlString = "http://config-server/configuration-web/jspider-slack.properties";
+        URL url = new URL( urlString);
+        InputStream inputStream = url.openStream();
+        Properties slackProperties = new Properties(  );
+        slackProperties.load( inputStream );
+        slackProperties.list( System.out );
+        String slackToken = slackProperties.getProperty( "token" );
+        String slackChannel = slackProperties.getProperty( "channel" );
+        System.out.printf("slackToken=%s%nslackChannel=%s%n", slackToken, slackChannel );
     }
 
 }
