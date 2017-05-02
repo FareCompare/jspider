@@ -80,6 +80,8 @@ public class SpiderHttpURLTask extends BaseWorkerTaskImpl {
         try {
 
             connection = url.openConnection();
+            connection.setConnectTimeout( 60000 );
+            connection.setReadTimeout( 60000 );
 
             if (connection instanceof HttpURLConnection ) {
                 ((HttpURLConnection) connection).setInstanceFollowRedirects(false);

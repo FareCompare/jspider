@@ -104,7 +104,7 @@ public class TestSlack {
         }
     }
 
-    @Test
+//    @Test
     public void loadSlackProperties() throws Exception {
         String urlString = "http://config-server/configuration-web/jspider-slack.properties";
         URL url = new URL( urlString);
